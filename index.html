@@ -144,10 +144,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
         let players = [];
         let currentUser = JSON.parse(sessionStorage.getItem('ef_user')) || null;
         const INITIAL_BUDGET = 5000000; // $5,000,000 Base Budget
