@@ -130,14 +130,19 @@
         // ⚠️ STEP 1: PASTE YOUR FIREBASE CONFIG HERE
         // ==========================================
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyCsz7eWfZChnjSJNiJCpP_RekLdJU5WFGw",
+            authDomain: "the-liga.firebaseapp.com",
+            databaseURL: "https://the-liga-default-rtdb.firebaseio.com",
+            projectId: "the-liga",
+            storageBucket: "the-liga.firebasestorage.app",
+            messagingSenderId: "399464608639",
+            appId: "1:399464608639:web:40a38cf60aebb30beaa04a",
+            measurementId: "G-YFNXDT2VLE"
         };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
