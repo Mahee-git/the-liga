@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eFootball Live Auction Hub</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -16,6 +19,12 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
+    <!-- Live Global Countdown Ticker -->
+    <div id="countdown-banner" class="bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all">
+        Loading Auction Timer...
+    </div>
+
+    <!-- Navbar -->
     <nav class="bg-slate-950 border-b border-cyan-500/30 p-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <h1 class="gaming-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-wider">
@@ -30,18 +39,20 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto p-4 md:p-6">
 
+        <!-- LOGIN MODAL WITH PIN REQUIREMENT -->
         <div id="login-section" class="max-w-md mx-auto my-12 bg-slate-950 p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
             <h2 class="gaming-font text-xl font-bold mb-6 text-center text-cyan-400">Enter Tournament Portal</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Participant Unique ID</label>
-                    <input type="text" id="user-id-input" placeholder="e.g., USER01" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Participant ID</label>
+                    <input type="text" id="user-id-input" placeholder="e.g., RAFID01" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500 uppercase">
                 </div>
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Manager/Team Name</label>
-                    <input type="text" id="user-name-input" placeholder="e.g., Red Devils FC" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Private 4-Digit PIN</label>
+                    <input type="password" id="user-pin-input" maxlength="4" placeholder="••••" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-cyan-500">
                 </div>
                 <button onclick="login()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 font-bold py-3 rounded cursor-pointer hover:opacity-90 text-sm uppercase tracking-widest text-slate-950">
                     Join Live Session
@@ -49,12 +60,14 @@
             </div>
         </div>
 
+        <!-- MAIN INTERFACE -->
         <div id="app-interface" class="hidden space-y-6">
             
-            <div class="bg-slate-950 p-4 rounded-xl border border-dashed border-slate-700 flex flex-wrap gap-4 justify-between items-center">
+            <!-- ADMIN PANEL -->
+            <div id="admin-controls-panel" class="bg-slate-950 p-4 rounded-xl border border-dashed border-slate-700 flex flex-wrap gap-4 justify-between items-center hidden">
                 <div>
                     <h3 class="text-sm font-bold text-slate-300">Tournament Master Controls</h3>
-                    <p class="text-xs text-slate-500">Uploading a CSV will overwrite the global database for everyone instantly.</p>
+                    <p class="text-xs text-slate-500">Authorized Admin Panel detected.</p>
                 </div>
                 <div class="flex gap-2">
                     <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="handleCSV(event)">
@@ -64,11 +77,12 @@
                 </div>
             </div>
 
+            <!-- DASHBOARD -->
             <section id="tab-dashboard" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
                     <h2 class="gaming-font text-lg font-bold text-cyan-400">Manager Profile</h2>
                     <div class="border-t border-slate-800 pt-3">
-                        <p class="text-xs text-slate-400 uppercase">Club Name</p>
+                        <p class="text-xs text-slate-400 uppercase">Club Manager</p>
                         <p id="dash-team-name" class="text-xl font-bold">-</p>
                         <p id="dash-user-id" class="text-xs text-slate-500">-</p>
                     </div>
@@ -95,6 +109,7 @@
                 </div>
             </section>
 
+            <!-- MARKET -->
             <section id="tab-market" class="tab-content hidden space-y-6">
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4">
                     <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:outline-none focus:border-cyan-500">
@@ -108,6 +123,7 @@
                 <div id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
+            <!-- TABLES & STATS -->
             <section id="tab-stats" class="tab-content hidden bg-slate-950 p-6 rounded-xl border border-slate-800">
                 <h2 class="gaming-font text-xl font-bold text-cyan-400 mb-6 text-center">Tournament Standings</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -127,8 +143,23 @@
 
     <script>
         // ==========================================
-        // ⚠️ STEP 1: PASTE YOUR FIREBASE CONFIG HERE
+        // 🔐 USER PERMISSIONS DATA STORE
         // ==========================================
+        const ROSTER_REGISTRY = {
+            "ADMIN":   { pin: "0000", name: "Tournament Admin" },
+            "RAFID01": { pin: "2468", name: "Md Rafid" },
+            "TEAM02":  { pin: "1111", name: "Gamer Elite" },
+            "TEAM03":  { pin: "2222", name: "Striker FC" },
+            "TEAM04":  { pin: "3333", name: "Pixel United" },
+            "TEAM05":  { pin: "4444", name: "Vanguard XI" },
+            "TEAM06":  { pin: "5555", name: "Galácticos" }
+        };
+
+        // ==========================================
+        // ⏱️ ABSOLUTE AUCTION DEADLINE SETTING
+        // ==========================================
+        const AUCTION_DEADLINE = new Date("July 13, 2026 14:00:00").getTime();
+
         const firebaseConfig = {
             apiKey: "AIzaSyCsz7eWfZChnjSJNiJCpP_RekLdJU5WFGw",
             authDomain: "the-liga.firebaseapp.com",
@@ -140,24 +171,54 @@
             measurementId: "G-YFNXDT2VLE"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let players = [];
         let currentUser = JSON.parse(sessionStorage.getItem('ef_user')) || null;
-        const INITIAL_BUDGET = 5000000; // $5,000,000 Base Budget
+        let clockInterval = null;
+        const INITIAL_BUDGET = 5000000;
 
         window.onload = function() {
+            startTimerEngine();
             if (currentUser) { loginRealtimeSync(); }
         };
 
+        // Live Dynamic Timer Engine
+        function startTimerEngine() {
+            if(clockInterval) clearInterval(clockInterval);
+            
+            clockInterval = setInterval(() => {
+                const now = Date.now();
+                const distance = AUCTION_DEADLINE - now;
+                const banner = document.getElementById('countdown-banner');
+
+                if (distance <= 0) {
+                    clearInterval(clockInterval);
+                    banner.innerText = "🚨 THE MARKET IS OFFICIALLY CLOSED! FIXTURES LOCKED. 🚨";
+                    banner.className = "bg-gradient-to-r from-red-600 to-rose-700 text-white font-bold text-center py-2 text-xs uppercase tracking-widest animate-pulse";
+                    renderMarket(); // Forces input layout disabling
+                    updateDashboard();
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                banner.innerText = `⏱️ LIVE AUCTION CLOSING IN: ${hours}h ${minutes}m ${seconds}s ⏱️`;
+            }, 1000);
+        }
+
         function login() {
             const id = document.getElementById('user-id-input').value.trim().toUpperCase();
-            const name = document.getElementById('user-name-input').value.trim();
-            if (!id || !name) return alert("Please fill in your Unique ID and Team Name!");
+            const pin = document.getElementById('user-pin-input').value.trim();
 
-            currentUser = { id: id, name: name };
+            if (!ROSTER_REGISTRY[id] || ROSTER_REGISTRY[id].pin !== pin) {
+                return alert("Access Denied: Invalid combination of User ID and Private Pin.");
+            }
+
+            currentUser = { id: id, name: ROSTER_REGISTRY[id].name };
             sessionStorage.setItem('ef_user', JSON.stringify(currentUser));
             loginRealtimeSync();
         }
@@ -167,7 +228,10 @@
             document.getElementById('app-interface').classList.remove('hidden');
             document.getElementById('nav-user').innerText = `${currentUser.name} (${currentUser.id})`;
 
-            // Realtime listener: triggers automatically whenever data updates anywhere globally
+            if (currentUser.id === "ADMIN") {
+                document.getElementById('admin-controls-panel').classList.remove('hidden');
+            }
+
             db.ref('players').on('value', (snapshot) => {
                 const data = snapshot.val();
                 players = data ? Object.values(data) : [];
@@ -210,26 +274,27 @@
                         };
                     }
                 }
-                // Push array to global cloud database
                 db.ref('players').set(parsedPlayers)
-                  .then(() => alert("Cloud Database successfully populated!"))
-                  .catch(err => alert("Error uploading: " + err.message));
+                  .then(() => alert("Cloud Database loaded perfectly!"))
+                  .catch(err => alert("Error: " + err.message));
             };
             reader.readAsText(file);
         }
 
         function updateDashboard() {
             document.getElementById('dash-team-name').innerText = currentUser.name;
-            document.getElementById('dash-user-id').innerText = `Manager ID: ${currentUser.id}`;
+            document.getElementById('dash-user-id').innerText = `ID Token: ${currentUser.id}`;
             
-            // Deduct dynamic allocation
-            const mySquad = players.filter(p => p.highestBidderId === currentUser.id && p.status === "Sold");
+            const isPastDeadline = Date.now() > AUCTION_DEADLINE;
+            
+            // If the deadline is past, they own everything where they were top bidder
+            const mySquad = players.filter(p => p.highestBidderId === currentUser.id && (p.status === "Sold" || isPastDeadline));
             const spent = mySquad.reduce((sum, p) => sum + p.currentBid, 0);
             document.getElementById('dash-balance').innerText = `$${(INITIAL_BUDGET - spent).toLocaleString()}`;
 
             const squadContainer = document.getElementById('squad-list');
             squadContainer.innerHTML = mySquad.length === 0 ? 
-                `<tr><td colspan="3" class="text-center text-xs text-slate-500 py-4">No signatures locked down yet.</td></tr>` : '';
+                `<tr><td colspan="3" class="text-center text-xs text-slate-500 py-4">No secured players.</td></tr>` : '';
 
             mySquad.forEach(p => {
                 squadContainer.innerHTML += `
@@ -247,64 +312,82 @@
             const posVal = document.getElementById('position-filter').value;
             grid.innerHTML = '';
 
+            const isPastDeadline = Date.now() > AUCTION_DEADLINE;
             const filtered = players.filter(p => p.name.toLowerCase().includes(searchVal) && (posVal === "" || p.position === posVal));
 
             if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center text-xs text-slate-500 py-12">No players on display.</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center text-xs text-slate-500 py-12">No players found.</div>`;
                 return;
             }
 
             filtered.forEach(player => {
-                const isSold = player.status === "Sold";
+                // If the clock passes the deadline, automatically classify the player as Sold
+                const isSold = player.status === "Sold" || (isPastDeadline && player.highestBidderId !== "");
+                const isExpired = isPastDeadline && player.highestBidderId === "";
                 const isLeading = player.highestBidderId === currentUser.id;
-                let cardStyle = isSold ? "border-red-900/30 bg-slate-950/60 opacity-60" : isLeading ? "border-emerald-500/40 bg-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.05)]" : "border-slate-800 bg-slate-950";
+                
+                let cardStyle = "border-slate-800 bg-slate-950";
+                let statusLabel = player.status;
+
+                if (isExpired) {
+                    cardStyle = "border-slate-950 bg-slate-950/40 opacity-40";
+                    statusLabel = "Expired Unsold";
+                } else if (isSold) {
+                    cardStyle = "border-red-900/30 bg-slate-950/60 opacity-70";
+                    statusLabel = "SOLD";
+                } else if (isLeading) {
+                    cardStyle = "border-emerald-500/40 bg-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.05)]";
+                }
 
                 grid.innerHTML += `
                     <div class="border p-5 rounded-xl flex flex-col justify-between ${cardStyle}">
                         <div>
                             <div class="flex justify-between items-start mb-2">
                                 <span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">${player.position}</span>
-                                <span class="text-xs ${isSold ? 'text-red-400' : 'text-cyan-400'} font-medium">${player.status}</span>
+                                <span class="text-xs ${isSold ? 'text-red-400 font-bold' : isExpired ? 'text-slate-500' : 'text-cyan-400'} font-medium">${statusLabel}</span>
                             </div>
                             <h3 class="gaming-font text-base font-bold text-white mb-4">${player.name}</h3>
                             <div class="space-y-1.5 text-xs bg-slate-900/60 p-3 rounded border border-slate-800">
                                 <div class="flex justify-between"><span class="text-slate-500">Base Price:</span> <span class="text-slate-300">$${player.basePrice.toLocaleString()}</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500">Current Bid:</span> <span class="text-cyan-400 font-bold">$${player.currentBid.toLocaleString()}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Current Valuation:</span> <span class="text-cyan-400 font-bold">$${player.currentBid.toLocaleString()}</span></div>
                                 <div class="flex justify-between text-[11px]"><span class="text-slate-500">Top Bidder:</span> <span class="text-slate-200 font-semibold">${player.highestBidderName}</span></div>
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t border-slate-900/60 flex gap-2">
-                            <input type="number" id="bid-input-${player.id}" placeholder="Enter higher amount" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none" ${isSold ? 'disabled' : ''}>
-                            <button onclick="placeBid('${player.id}')" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-bold text-xs py-1.5 rounded transition uppercase" ${isSold ? 'disabled' : ''}>Bid</button>
+                            <input type="number" id="bid-input-${player.id}" placeholder="+$25k higher" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none" ${isSold || isExpired ? 'disabled' : ''}>
+                            <button onclick="placeBid('${player.id}')" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-bold text-xs py-1.5 rounded transition uppercase" ${isSold || isExpired ? 'disabled' : ''}>Bid</button>
                         </div>
-                        ${!isSold ? `<button onclick="finalizeSale('${player.id}')" class="w-full mt-2 text-[10px] text-red-400 bg-red-950/20 py-1 rounded border border-red-900/30 hover:bg-red-950/50">Admin: Hammer Down Sale</button>` : ''}
                     </div>`;
             });
         }
 
         function placeBid(pId) {
+            if (Date.now() > AUCTION_DEADLINE) {
+                alert("Action Blocked: The auction window closed at 2:00 PM!");
+                return;
+            }
+
             const player = players.find(p => p.id === pId);
             const input = document.getElementById(`bid-input-${pId}`);
             const amount = parseInt(input.value);
 
             if (!amount || amount <= player.currentBid) {
-                return alert(`Invalid offer! Bid must crush the current high valuation of $${player.currentBid.toLocaleString()}`);
+                return alert(`Invalid offer! Your bid must be higher than $${player.currentBid.toLocaleString()}`);
             }
 
-            // Real-time dynamic updates push straight to Firebase database reference
+            // Client side balance check
+            const mySquad = players.filter(p => p.highestBidderId === currentUser.id && (p.status === "Sold" || Date.now() > AUCTION_DEADLINE));
+            const spent = mySquad.reduce((sum, p) => sum + p.currentBid, 0);
+            if ((INITIAL_BUDGET - spent) < amount) {
+                return alert("Financial Fair Play: Bid exceeds your total budget threshold!");
+            }
+
             db.ref(`players/${pId}`).update({
                 currentBid: amount,
                 highestBidderId: currentUser.id,
                 highestBidderName: currentUser.name,
                 status: "Active Bidding"
             });
-        }
-
-        function finalizeSale(pId) {
-            const player = players.find(p => p.id === pId);
-            if (!player.highestBidderId) return alert("No bids present to lock down signature.");
-            
-            db.ref(`players/${pId}`).update({ status: "Sold" });
         }
     </script>
 </body>
