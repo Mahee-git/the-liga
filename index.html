@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eFootball Live Auction Hub</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -19,88 +17,106 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
-    <!-- Live Global Countdown Ticker -->
     <div id="countdown-banner" class="bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all">
-        Loading Auction Timer...
+        Loading System State...
     </div>
 
-    <!-- Navbar -->
     <nav class="bg-slate-950 border-b border-cyan-500/30 p-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <h1 class="gaming-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-wider">
-                eFOOTBALL LIVE
+                eFOOTBALL LIVE <span id="nav-season-badge" class="text-xs bg-slate-800 text-cyan-400 px-2 py-0.5 rounded ml-2">Season 1</span>
             </h1>
-            <div class="flex gap-6 text-sm font-semibold">
+            <div id="nav-links" class="hidden flex gap-6 text-sm font-semibold">
                 <button onclick="switchTab('dashboard')" class="tab-btn text-cyan-400 border-b-2 border-cyan-400 pb-1">Dashboard</button>
                 <button onclick="switchTab('market')" class="tab-btn text-slate-400 hover:text-white pb-1">Bidding Market</button>
-                <button onclick="switchTab('stats')" class="tab-btn text-slate-400 hover:text-white pb-1">Fixtures & Tables</button>
+                <button onclick="switchTab('stats')" class="tab-btn text-slate-400 hover:text-white pb-1">Fixtures & Standings</button>
             </div>
-            <div id="nav-user" class="text-xs bg-slate-800 px-3 py-1.5 rounded border border-slate-700">Not Logged In</div>
+            <div class="flex items-center gap-4">
+                <div id="nav-user" class="text-xs bg-slate-800 px-3 py-1.5 rounded border border-slate-700">Not Logged In</div>
+                <button id="logout-btn" onclick="logout()" class="hidden text-xs text-rose-400 hover:underline">Logout</button>
+            </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto p-4 md:p-6">
 
-        <!-- LOGIN MODAL WITH PIN REQUIREMENT -->
-        <div id="login-section" class="max-w-md mx-auto my-12 bg-slate-950 p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
-            <h2 class="gaming-font text-xl font-bold mb-6 text-center text-cyan-400">Enter Tournament Portal</h2>
+        <div id="auth-section" class="max-w-md mx-auto my-12 bg-slate-950 p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
+            <div class="flex justify-center gap-4 mb-6 border-b border-slate-800 pb-4">
+                <button id="toggle-login-btn" onclick="toggleAuthMode('login')" class="text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1">Sign In</button>
+                <button id="toggle-signup-btn" onclick="toggleAuthMode('signup')" class="text-slate-400 font-bold text-sm uppercase tracking-wider pb-1">Create Account</button>
+            </div>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Participant ID</label>
-                    <input type="text" id="user-id-input" placeholder="e.g., RAFID01" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500 uppercase">
+                <div id="signup-name-field" class="hidden">
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Manager / Team Name</label>
+                    <input type="text" id="auth-name" placeholder="e.g., Dhaka Galácticos" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
                 </div>
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Private 4-Digit PIN</label>
-                    <input type="password" id="user-pin-input" maxlength="4" placeholder="••••" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white font-mono text-center tracking-widest text-lg focus:outline-none focus:border-cyan-500">
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Email Address</label>
+                    <input type="email" id="auth-email" placeholder="name@example.com" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
                 </div>
-                <button onclick="login()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 font-bold py-3 rounded cursor-pointer hover:opacity-90 text-sm uppercase tracking-widest text-slate-950">
-                    Join Live Session
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Password</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <button id="auth-submit-btn" onclick="handleAuth()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 font-bold py-3 rounded cursor-pointer hover:opacity-90 text-sm uppercase tracking-widest text-slate-950">
+                    Sign In
                 </button>
             </div>
         </div>
 
-        <!-- MAIN INTERFACE -->
         <div id="app-interface" class="hidden space-y-6">
             
-            <!-- ADMIN PANEL -->
-            <div id="admin-controls-panel" class="bg-slate-950 p-4 rounded-xl border border-dashed border-slate-700 flex flex-wrap gap-4 justify-between items-center hidden">
+            <div id="admin-controls-panel" class="bg-slate-950 p-4 rounded-xl border border-dashed border-red-500/30 flex flex-wrap gap-4 justify-between items-center hidden">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-300">Tournament Master Controls</h3>
-                    <p class="text-xs text-slate-500">Authorized Admin Panel detected.</p>
+                    <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">Tournament Master Dashboard</h3>
+                    <p class="text-xs text-slate-500">Generate scheduling fixtures and advance seasonal structures.</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-3">
                     <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="handleCSV(event)">
-                    <label for="csv-file" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2 rounded cursor-pointer font-medium border border-slate-600 transition">
+                    <label for="csv-file" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2 rounded cursor-pointer font-medium border border-slate-600 transition text-slate-200">
                         Upload Fresh Players CSV
                     </label>
+                    <button onclick="generateFixtures()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded transition shadow">
+                        🗓️ Generate League Fixtures
+                    </button>
+                    <button onclick="advanceSeason()" class="bg-gradient-to-r from-amber-600 to-orange-600 text-slate-950 text-xs font-bold px-4 py-2 rounded shadow hover:opacity-90 transition">
+                        ⏩ Advance to Next Season
+                    </button>
                 </div>
             </div>
 
-            <!-- DASHBOARD -->
             <section id="tab-dashboard" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
-                    <h2 class="gaming-font text-lg font-bold text-cyan-400">Manager Profile</h2>
+                <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4 h-fit">
+                    <h2 class="gaming-font text-lg font-bold text-cyan-400">Club Standings</h2>
+                    
+                    <div>
+                        <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Select Roster View Focus</label>
+                        <select id="squad-focus-selector" onchange="updateDashboardView()" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500"></select>
+                    </div>
+
                     <div class="border-t border-slate-800 pt-3">
-                        <p class="text-xs text-slate-400 uppercase">Club Manager</p>
-                        <p id="dash-team-name" class="text-xl font-bold">-</p>
-                        <p id="dash-user-id" class="text-xs text-slate-500">-</p>
+                        <p class="text-xs text-slate-400 uppercase">Manager Status</p>
+                        <p id="dash-team-name" class="text-xl font-bold text-white">-</p>
                     </div>
                     <div class="bg-slate-900 p-4 rounded border border-emerald-500/20">
-                        <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Remaining Budget</p>
-                        <p id="dash-balance" class="text-3xl font-bold text-white mt-1">$5,000,000</p>
+                        <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Remaining Capital Balance</p>
+                        <p id="dash-balance" class="text-3xl font-bold text-white mt-1">200M</p>
                     </div>
                 </div>
 
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
-                    <h2 class="gaming-font text-lg font-bold text-emerald-400 mb-4">Your Signed Squad</h2>
+                    <h2 class="gaming-font text-lg font-bold text-emerald-400 mb-4 flex justify-between items-center">
+                        <span>Active Squad Roster Layout</span>
+                        <span class="text-xs font-sans text-slate-500 font-normal">Sorted: CF ➔ GK</span>
+                    </h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead>
                                 <tr class="text-xs text-slate-500 border-b border-slate-800 uppercase">
-                                    <th class="pb-2">Player</th>
-                                    <th class="pb-2">Position</th>
-                                    <th class="pb-2 text-right">Winning Bid</th>
+                                    <th class="pb-2">Player Info</th>
+                                    <th class="pb-2 text-center">Position</th>
+                                    <th class="pb-2 text-center">Contract Rest</th>
+                                    <th class="pb-2 text-right">Value (Millions)</th>
                                 </tr>
                             </thead>
                             <tbody id="squad-list" class="divide-y divide-slate-800/50"></tbody>
@@ -109,7 +125,6 @@
                 </div>
             </section>
 
-            <!-- MARKET -->
             <section id="tab-market" class="tab-content hidden space-y-6">
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4">
                     <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:outline-none focus:border-cyan-500">
@@ -123,18 +138,31 @@
                 <div id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
-            <!-- TABLES & STATS -->
-            <section id="tab-stats" class="tab-content hidden bg-slate-950 p-6 rounded-xl border border-slate-800">
-                <h2 class="gaming-font text-xl font-bold text-cyan-400 mb-6 text-center">Tournament Standings</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-400 mb-3 border-b border-slate-800 pb-1">LEAGUE TABLE</h3>
-                        <div class="text-center text-xs text-slate-500 py-8 border border-dashed border-slate-800 rounded">Table will sync here post-auction.</div>
+            <section id="tab-stats" class="tab-content hidden space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-1 h-fit">
+                        <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">League Standings Table</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="text-slate-500 border-b border-slate-800 uppercase">
+                                        <th class="pb-2">Club</th>
+                                        <th class="pb-2 text-center">P</th>
+                                        <th class="pb-2 text-center">GD</th>
+                                        <th class="pb-2 text-right">Pts</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="league-table-body" class="divide-y divide-slate-800/50 font-mono"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-400 mb-3 border-b border-slate-800 pb-1">FIXTURES</h3>
-                        <div class="text-center text-xs text-slate-500 py-8 border border-dashed border-slate-800 rounded">Fixtures schedule generating soon.</div>
+
+                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
+                        <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">Fixture Management Center</h3>
+                        <div id="fixtures-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
                     </div>
+
                 </div>
             </section>
 
@@ -142,23 +170,11 @@
     </main>
 
     <script>
-        // ==========================================
-        // 🔐 USER PERMISSIONS DATA STORE
-        // ==========================================
-        const ROSTER_REGISTRY = {
-            "ADMIN":   { pin: "0000", name: "Tournament Admin" },
-            "RAFID01": { pin: "2468", name: "Md Rafid" },
-            "TEAM02":  { pin: "1111", name: "Gamer Elite" },
-            "TEAM03":  { pin: "2222", name: "Striker FC" },
-            "TEAM04":  { pin: "3333", name: "Pixel United" },
-            "TEAM05":  { pin: "4444", name: "Vanguard XI" },
-            "TEAM06":  { pin: "5555", name: "Galácticos" }
+        // POSITION WEIGHT MATRIX FOR HIERARCHICAL CF ➔ GK SORTING
+        const POSITION_ORDER = { 
+            "CF": 1, "LWF": 2, "RWF": 3, "AMF": 4, "CMF": 5, 
+            "DMF": 6, "LB": 7, "CB": 8, "RB": 9, "GK": 10 
         };
-
-        // ==========================================
-        // ⏱️ ABSOLUTE AUCTION DEADLINE SETTING
-        // ==========================================
-        const AUCTION_DEADLINE = new Date("July 14, 2026 21:29:00").getTime();
 
         const firebaseConfig = {
             apiKey: "AIzaSyCsz7eWfZChnjSJNiJCpP_RekLdJU5WFGw",
@@ -173,78 +189,147 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const auth = firebase.auth();
 
         let players = [];
-        let currentUser = JSON.parse(sessionStorage.getItem('ef_user')) || null;
+        let usersMap = {};
+        let fixturesList = [];
+        let userData = null;
+        let authMode = 'login';
+        let currentSeason = 1;
+        let auctionDeadline = null;
         let clockInterval = null;
-        const INITIAL_BUDGET = 5000000;
+        const INITIAL_BUDGET = 200; // RECALIBRATED ECONOMY CRITERIA
 
-        window.onload = function() {
-            startTimerEngine();
-            if (currentUser) { loginRealtimeSync(); }
-        };
-
-        // Live Dynamic Timer Engine
-        function startTimerEngine() {
-            if(clockInterval) clearInterval(clockInterval);
-            
-            clockInterval = setInterval(() => {
-                const now = Date.now();
-                const distance = AUCTION_DEADLINE - now;
-                const banner = document.getElementById('countdown-banner');
-
-                if (distance <= 0) {
-                    clearInterval(clockInterval);
-                    banner.innerText = "🚨 THE MARKET IS OFFICIALLY CLOSED! FIXTURES LOCKED. 🚨";
-                    banner.className = "bg-gradient-to-r from-red-600 to-rose-700 text-white font-bold text-center py-2 text-xs uppercase tracking-widest animate-pulse";
-                    renderMarket(); // Forces input layout disabling
-                    updateDashboard();
-                    return;
-                }
-
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                banner.innerText = `⏱️ LIVE AUCTION CLOSING IN: ${hours}h ${minutes}m ${seconds}s ⏱️`;
-            }, 1000);
-        }
-
-        function login() {
-            const id = document.getElementById('user-id-input').value.trim().toUpperCase();
-            const pin = document.getElementById('user-pin-input').value.trim();
-
-            if (!ROSTER_REGISTRY[id] || ROSTER_REGISTRY[id].pin !== pin) {
-                return alert("Access Denied: Invalid combination of User ID and Private Pin.");
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                db.ref('users').on('value', (snapshot) => {
+                    usersMap = snapshot.val() || {};
+                    userData = usersMap[user.uid] || { name: "Anonymous Manager", role: "player" };
+                    userData.uid = user.uid;
+                    
+                    buildManagerSelectorDropdown();
+                    initializeLiveEnvironment();
+                });
+            } else {
+                showAuthPortal();
             }
+        });
 
-            currentUser = { id: id, name: ROSTER_REGISTRY[id].name };
-            sessionStorage.setItem('ef_user', JSON.stringify(currentUser));
-            loginRealtimeSync();
+        function buildManagerSelectorDropdown() {
+            const selector = document.getElementById('squad-focus-selector');
+            if(!selector) return;
+            let optionsHTML = '';
+            Object.keys(usersMap).forEach(uid => {
+                if(usersMap[uid].role !== 'admin') {
+                    const selectedAttr = uid === auth.currentUser.uid ? 'selected' : '';
+                    optionsHTML += `<option value="${uid}" ${selectedAttr}>${usersMap[uid].name}</option>`;
+                }
+            });
+            selector.innerHTML = optionsHTML;
         }
 
-        function loginRealtimeSync() {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('app-interface').classList.remove('hidden');
-            document.getElementById('nav-user').innerText = `${currentUser.name} (${currentUser.id})`;
+        function toggleAuthMode(mode) {
+            authMode = mode;
+            const nameField = document.getElementById('signup-name-field');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            
+            document.getElementById('toggle-login-btn').className = mode === 'login' ? 'text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1' : 'text-slate-400 font-bold text-sm uppercase tracking-wider pb-1';
+            document.getElementById('toggle-signup-btn').className = mode === 'signup' ? 'text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1' : 'text-slate-400 font-bold text-sm uppercase tracking-wider pb-1';
 
-            if (currentUser.id === "ADMIN") {
+            if (mode === 'signup') {
+                nameField.classList.remove('hidden');
+                submitBtn.innerText = "Register Account";
+            } else {
+                nameField.classList.add('hidden');
+                submitBtn.innerText = "Sign In";
+            }
+        }
+
+        function handleAuth() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value.trim();
+
+            if (!email || !password) return alert("Please fill in core connection attributes.");
+
+            if (authMode === 'signup') {
+                if (!name) return alert("Please clarify your custom Team moniker.");
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((cred) => {
+                        const role = email.toLowerCase() === "admin@theliga.com" ? "admin" : "player";
+                        return db.ref(`users/${cred.user.uid}`).set({ name: name, role: role });
+                    })
+                    .catch(err => alert(err.message));
+            } else {
+                auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
+            }
+        }
+
+        function logout() { auth.signOut().then(() => location.reload()); }
+
+        function showAuthPortal() {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('app-interface').classList.add('hidden');
+            document.getElementById('nav-links').classList.add('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
+        }
+
+        function initializeLiveEnvironment() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('app-interface').classList.remove('hidden');
+            document.getElementById('nav-links').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.getElementById('nav-user').innerText = `${userData.name}`;
+
+            if (userData.role === 'admin') {
                 document.getElementById('admin-controls-panel').classList.remove('hidden');
             }
+
+            db.ref('systemSettings').on('value', (snapshot) => {
+                const settings = snapshot.val() || {};
+                currentSeason = settings.currentSeason || 1;
+                auctionDeadline = settings.auctionDeadline || new Date("July 13, 2026 14:00:00").getTime();
+                document.getElementById('nav-season-badge').innerText = `Season ${currentSeason}`;
+                startTimerEngine();
+            });
 
             db.ref('players').on('value', (snapshot) => {
                 const data = snapshot.val();
                 players = data ? Object.values(data) : [];
-                updateDashboard();
+                updateDashboardView();
                 renderMarket();
+            });
+
+            // Live Fixtures Engine pipeline hook
+            db.ref('fixtures').on('value', (snapshot) => {
+                const data = snapshot.val();
+                fixturesList = data ? Object.values(data) : [];
+                renderStandingsAndFixtures();
             });
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('text-cyan-400', 'border-b-2', 'border-cyan-400'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            event.target.classList.add('text-cyan-400', 'border-b-2', 'border-cyan-400');
+        function startTimerEngine() {
+            if(clockInterval) clearInterval(clockInterval);
+            clockInterval = setInterval(() => {
+                if (!auctionDeadline) return;
+                const now = Date.now();
+                const distance = auctionDeadline - now;
+                const banner = document.getElementById('countdown-banner');
+
+                if (distance <= 0) {
+                    clearInterval(clockInterval);
+                    banner.innerText = `🚨 MARKET LOCKED FOR SEASON ${currentSeason}. PLAY OUT YOUR MATCH FIXTURES! 🚨`;
+                    banner.className = "bg-gradient-to-r from-red-600 to-rose-700 text-white font-bold text-center py-2 text-xs uppercase tracking-widest animate-pulse";
+                    renderMarket();
+                    updateDashboardView();
+                    return;
+                }
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                banner.innerText = `⏱️ AUCTION STATUS: CLOSING IN ${hours}h ${minutes}m ${seconds}s ⏱️`;
+            }, 1000);
         }
 
         function handleCSV(event) {
@@ -261,47 +346,69 @@
                     const cols = lines[i].split(',');
                     if (cols.length >= 3) {
                         const pId = "P" + String(i).padStart(3, '0');
-                        const basePrice = parseInt(cols[2].replace(/[^0-9]/g, '')) || 100000;
+                        let rawPrice = parseInt(cols[2].replace(/[^0-9]/g, ''));
+                        
+                        // Smart Normalization: Converts full 50,000,000 down into a crisp 50
+                        if (rawPrice >= 100000) {
+                            rawPrice = Math.round(rawPrice / 1000000);
+                        }
+
                         parsedPlayers[pId] = {
                             id: pId,
                             name: cols[0].trim(),
                             position: cols[1].trim().toUpperCase(),
-                            basePrice: basePrice,
-                            currentBid: basePrice,
+                            basePrice: rawPrice,
+                            currentBid: rawPrice,
                             highestBidderId: "",
                             highestBidderName: "No Bids",
-                            status: "Available"
+                            status: "Available",
+                            contractYearsSelected: 1, 
+                            contractRemaining: 0
                         };
                     }
                 }
                 db.ref('players').set(parsedPlayers)
-                  .then(() => alert("Cloud Database loaded perfectly!"))
-                  .catch(err => alert("Error: " + err.message));
+                  .then(() => alert("Normalized 200M Economy Database Loaded!"))
+                  .catch(err => alert(err.message));
             };
             reader.readAsText(file);
         }
 
-        function updateDashboard() {
-            document.getElementById('dash-team-name').innerText = currentUser.name;
-            document.getElementById('dash-user-id').innerText = `ID Token: ${currentUser.id}`;
+        // Feature 1 & 6: View Focus update with specific layout positions sorting criteria
+        function updateDashboardView() {
+            const selector = document.getElementById('squad-focus-selector');
+            if(!selector || !selector.value) return;
             
-            const isPastDeadline = Date.now() > AUCTION_DEADLINE;
+            const targetUid = selector.value;
+            const targetUser = usersMap[targetUid];
+            const isPastDeadline = Date.now() > auctionDeadline;
+
+            // Compute active roster assets assigned to target profile scope
+            const targetSquad = players.filter(p => p.highestBidderId === targetUid && (p.contractRemaining > 0 || isPastDeadline));
             
-            // If the deadline is past, they own everything where they were top bidder
-            const mySquad = players.filter(p => p.highestBidderId === currentUser.id && (p.status === "Sold" || isPastDeadline));
-            const spent = mySquad.reduce((sum, p) => sum + p.currentBid, 0);
-            document.getElementById('dash-balance').innerText = `$${(INITIAL_BUDGET - spent).toLocaleString()}`;
+            // Feature 6 Sorting Rule execution: Hierarchy layout implementation
+            targetSquad.sort((a, b) => {
+                const orderA = POSITION_ORDER[a.position] || 99;
+                const orderB = POSITION_ORDER[b.position] || 99;
+                return orderA - orderB;
+            });
 
-            const squadContainer = document.getElementById('squad-list');
-            squadContainer.innerHTML = mySquad.length === 0 ? 
-                `<tr><td colspan="3" class="text-center text-xs text-slate-500 py-4">No secured players.</td></tr>` : '';
+            const seasonalSpent = players.filter(p => p.highestBidderId === targetUid && isPastDeadline && p.contractRemaining === (p.contractYearsSelected - 1)).reduce((sum, p) => sum + p.currentBid, 0);
 
-            mySquad.forEach(p => {
-                squadContainer.innerHTML += `
-                    <tr class="hover:bg-slate-900/40 text-xs">
+            document.getElementById('dash-team-name').innerText = targetUser ? targetUser.name : "Unknown Club";
+            document.getElementById('dash-balance').innerText = `${(INITIAL_BUDGET - seasonalSpent)}M`;
+
+            const container = document.getElementById('squad-list');
+            container.innerHTML = targetSquad.length === 0 ? `<tr><td colspan="4" class="text-center text-xs text-slate-500 py-6">No roster parameters acquired.</td></tr>` : '';
+
+            targetSquad.forEach(p => {
+                const displayRemaining = p.contractRemaining > 0 ? p.contractRemaining : p.contractYearsSelected;
+                container.innerHTML += `
+                    <tr class="hover:bg-slate-900/40 text-xs border-b border-slate-800/40">
                         <td class="py-3 font-semibold text-white">${p.name}</td>
-                        <td class="py-3 text-slate-400">${p.position}</td>
-                        <td class="py-3 text-right text-emerald-400 font-bold">$${p.currentBid.toLocaleString()}</td>
+                        <td class="py-3 text-center"><span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold font-mono">${p.position}</span></td>
+                        <td class="py-3 text-center text-cyan-400 font-mono">${displayRemaining} ${displayRemaining === 1 ? 'Season' : 'Seasons'}</td>
+                        <td class="py-3 text-right text-emerald-400 font-bold font-mono">${p.currentBid}M</td>
                     </tr>`;
             });
         }
@@ -312,30 +419,33 @@
             const posVal = document.getElementById('position-filter').value;
             grid.innerHTML = '';
 
-            const isPastDeadline = Date.now() > AUCTION_DEADLINE;
+            const isPastDeadline = Date.now() > auctionDeadline;
             const filtered = players.filter(p => p.name.toLowerCase().includes(searchVal) && (posVal === "" || p.position === posVal));
 
             if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center text-xs text-slate-500 py-12">No players found.</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center text-xs text-slate-500 py-12">No market targets found.</div>`;
                 return;
             }
 
             filtered.forEach(player => {
-                // If the clock passes the deadline, automatically classify the player as Sold
-                const isSold = player.status === "Sold" || (isPastDeadline && player.highestBidderId !== "");
-                const isExpired = isPastDeadline && player.highestBidderId === "";
-                const isLeading = player.highestBidderId === currentUser.id;
+                const isLockedByContract = player.contractRemaining > 0;
+                const isSoldThisSeason = !isLockedByContract && (player.status === "Sold" || (isPastDeadline && player.highestBidderId !== ""));
+                const isUnsoldExpired = isPastDeadline && player.highestBidderId === "";
                 
                 let cardStyle = "border-slate-800 bg-slate-950";
                 let statusLabel = player.status;
+                let disabledAttr = (isSoldThisSeason || isUnsoldExpired || isLockedByContract) ? 'disabled' : '';
 
-                if (isExpired) {
+                if (isLockedByContract) {
+                    cardStyle = "border-amber-900/40 bg-slate-950/40 opacity-75";
+                    statusLabel = `LOCKED (${player.highestBidderName})`;
+                } else if (isUnsoldExpired) {
                     cardStyle = "border-slate-950 bg-slate-950/40 opacity-40";
                     statusLabel = "Expired Unsold";
-                } else if (isSold) {
+                } else if (isSoldThisSeason) {
                     cardStyle = "border-red-900/30 bg-slate-950/60 opacity-70";
-                    statusLabel = "SOLD";
-                } else if (isLeading) {
+                    statusLabel = "ACQUIRED";
+                } else if (player.highestBidderId === userData.uid) {
                     cardStyle = "border-emerald-500/40 bg-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.05)]";
                 }
 
@@ -344,50 +454,294 @@
                         <div>
                             <div class="flex justify-between items-start mb-2">
                                 <span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">${player.position}</span>
-                                <span class="text-xs ${isSold ? 'text-red-400 font-bold' : isExpired ? 'text-slate-500' : 'text-cyan-400'} font-medium">${statusLabel}</span>
+                                <span class="text-xs ${isSoldThisSeason ? 'text-red-400 font-bold' : 'text-cyan-400'} font-medium uppercase">${statusLabel}</span>
                             </div>
                             <h3 class="gaming-font text-base font-bold text-white mb-4">${player.name}</h3>
-                            <div class="space-y-1.5 text-xs bg-slate-900/60 p-3 rounded border border-slate-800">
-                                <div class="flex justify-between"><span class="text-slate-500">Base Price:</span> <span class="text-slate-300">$${player.basePrice.toLocaleString()}</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500">Current Valuation:</span> <span class="text-cyan-400 font-bold">$${player.currentBid.toLocaleString()}</span></div>
-                                <div class="flex justify-between text-[11px]"><span class="text-slate-500">Top Bidder:</span> <span class="text-slate-200 font-semibold">${player.highestBidderName}</span></div>
+                            
+                            <div class="space-y-1.5 text-xs bg-slate-900/60 p-3 rounded border border-slate-800 mb-4">
+                                <div class="flex justify-between"><span class="text-slate-500">Base Cost:</span> <span class="text-slate-300 font-mono">${player.basePrice}M</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Current Value:</span> <span class="text-cyan-400 font-bold font-mono">${player.currentBid}M</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Top Bidder:</span> <span class="text-slate-200 font-semibold">${player.highestBidderName}</span></div>
                             </div>
+
+                            ${(!isSoldThisSeason && !isUnsoldExpired && !isLockedByContract) ? `
+                                <div class="mb-3">
+                                    <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Contract Parameters</label>
+                                    <select id="contract-select-${player.id}" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-1.5 text-slate-300 focus:outline-none">
+                                        <option value="1">1 Season lease</option>
+                                        <option value="2">2 Seasons lease</option>
+                                        <option value="3">3 Seasons lease</option>
+                                    </select>
+                                </div>
+                            ` : ''}
                         </div>
-                        <div class="mt-4 pt-3 border-t border-slate-900/60 flex gap-2">
-                            <input type="number" id="bid-input-${player.id}" placeholder="+$25k higher" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none" ${isSold || isExpired ? 'disabled' : ''}>
-                            <button onclick="placeBid('${player.id}')" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-bold text-xs py-1.5 rounded transition uppercase" ${isSold || isExpired ? 'disabled' : ''}>Bid</button>
+
+                        <div class="space-y-2 mt-2 pt-3 border-t border-slate-900/60">
+                            <div class="flex gap-2">
+                                <input type="number" id="bid-input-${player.id}" placeholder="Custom Millions" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white text-center font-mono focus:outline-none" ${disabledAttr}>
+                                <button onclick="placeBid('${player.id}', null)" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-1.5 rounded transition uppercase border border-slate-700" ${disabledAttr}>Custom</button>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="placeBid('${player.id}', 1)" class="w-1/2 bg-blue-950/60 hover:bg-blue-900 text-blue-400 font-bold text-[11px] py-2 rounded border border-blue-900/50 transition font-mono" ${disabledAttr}>+1M BID</button>
+                                <button onclick="placeBid('${player.id}', 2)" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold text-[11px] py-2 rounded transition font-mono uppercase shadow" ${disabledAttr}>+2M BID</button>
+                            </div>
                         </div>
                     </div>`;
             });
         }
 
-        function placeBid(pId) {
-            if (Date.now() > AUCTION_DEADLINE) {
-                alert("Action Blocked: The auction window closed at 2:00 PM!");
-                return;
-            }
+        function placeBid(pId, quickIncrement) {
+            if (Date.now() > auctionDeadline) return alert("Action Terminated: Bidding schedule window is closed!");
 
             const player = players.find(p => p.id === pId);
-            const input = document.getElementById(`bid-input-${pId}`);
-            const amount = parseInt(input.value);
+            let targetBid = 0;
 
-            if (!amount || amount <= player.currentBid) {
-                return alert(`Invalid offer! Your bid must be higher than $${player.currentBid.toLocaleString()}`);
+            if (quickIncrement !== null) {
+                targetBid = player.currentBid + quickIncrement;
+            } else {
+                const inputVal = parseInt(document.getElementById(`bid-input-${pId}`).value);
+                if (!inputVal) return alert("Specify absolute Millions target numeric parameter values.");
+                targetBid = inputVal;
             }
 
-            // Client side balance check
-            const mySquad = players.filter(p => p.highestBidderId === currentUser.id && (p.status === "Sold" || Date.now() > AUCTION_DEADLINE));
-            const spent = mySquad.reduce((sum, p) => sum + p.currentBid, 0);
-            if ((INITIAL_BUDGET - spent) < amount) {
-                return alert("Financial Fair Play: Bid exceeds your total budget threshold!");
+            if (targetBid <= player.currentBid) {
+                return alert(`Offer Denied: Must scale value past ${player.currentBid}M`);
             }
+
+            const contractDropdown = document.getElementById(`contract-select-${pId}`);
+            const chosenYears = contractDropdown ? parseInt(contractDropdown.value) : 1;
 
             db.ref(`players/${pId}`).update({
-                currentBid: amount,
-                highestBidderId: currentUser.id,
-                highestBidderName: currentUser.name,
-                status: "Active Bidding"
+                currentBid: targetBid,
+                highestBidderId: userData.uid,
+                highestBidderName: userData.name,
+                status: "Active Bidding",
+                contractYearsSelected: chosenYears
             });
+        }
+
+        // Feature 3: Dynamic Circle/Berger Round-Robin Scheduling Generator Engine
+        function generateFixtures() {
+            const managers = Object.keys(usersMap).filter(uid => usersMap[uid].role !== 'admin');
+            if(managers.length < 2) return alert("Aborting Generation: Insufficient user nodes verified inside database structure.");
+
+            if(managers.length % 2 !== 0) {
+                managers.push("BYE_NODE"); 
+            }
+
+            const numTeams = managers.length;
+            const rounds = numTeams - 1;
+            const fixtures = {};
+            let matchCounter = 0;
+
+            // Generate Home Matrix
+            for (let round = 0; round < rounds; round++) {
+                for (let i = 0; i < numTeams / 2; i++) {
+                    const home = managers[(round + i) % (numTeams - 1)];
+                    let away = managers[(numTeams - 1 - i + round) % (numTeams - 1)];
+                    if (i === 0) away = managers[numTeams - 1];
+
+                    if(home !== "BYE_NODE" && away !== "BYE_NODE") {
+                        matchCounter++;
+                        const id = "M" + String(matchCounter).padStart(3, '0');
+                        fixtures[id] = {
+                            id: id, homeId: home, homeName: usersMap[home].name,
+                            awayId: away, awayName: usersMap[away].name,
+                            homeScore: "-", awayScore: "-", status: "Scheduled",
+                            reportedBy: "", round: round + 1
+                        };
+                    }
+                }
+            }
+
+            // Generate Away Matrix
+            for (let round = 0; round < rounds; round++) {
+                for (let i = 0; i < numTeams / 2; i++) {
+                    let home = managers[(round + i) % (numTeams - 1)];
+                    const away = managers[(numTeams - 1 - i + round) % (numTeams - 1)];
+                    if (i === 0) home = managers[numTeams - 1];
+
+                    if(home !== "BYE_NODE" && away !== "BYE_NODE") {
+                        matchCounter++;
+                        const id = "M" + String(matchCounter).padStart(3, '0');
+                        fixtures[id] = {
+                            id: id, homeId: away, homeName: usersMap[away].name,
+                            awayId: home, awayName: usersMap[home].name,
+                            homeScore: "-", awayScore: "-", status: "Scheduled",
+                            reportedBy: "", round: round + rounds + 1
+                        };
+                    }
+                }
+            }
+
+            db.ref('fixtures').set(fixtures).then(() => alert("Balanced Home/Away Fixture Matrix Compiled!"));
+        }
+
+        // Feature 4: Interactive Mutual Peer Verification Architecture
+        function renderStandingsAndFixtures() {
+            const tableBody = document.getElementById('league-table-body');
+            const fixturesContainer = document.getElementById('fixtures-container');
+            
+            // 1. Calculate Real-Time Standings
+            const tableData = {};
+            Object.keys(usersMap).forEach(uid => {
+                if(usersMap[uid].role !== 'admin') {
+                    tableData[uid] = { name: usersMap[uid].name, played: 0, gd: 0, pts: 0 };
+                }
+            });
+
+            fixturesList.forEach(m => {
+                if(m.status === "Approved") {
+                    const hScore = parseInt(m.homeScore);
+                    const aScore = parseInt(m.awayScore);
+                    if(tableData[m.homeId] && tableData[m.awayId]) {
+                        tableData[m.homeId].played++;
+                        tableData[m.awayId].played++;
+                        tableData[m.homeId].gd += (hScore - aScore);
+                        tableData[m.awayId].gd += (aScore - hScore);
+
+                        if(hScore > aScore) tableData[m.homeId].pts += 3;
+                        else if(aScore > hScore) tableData[m.awayId].pts += 3;
+                        else {
+                            tableData[m.homeId].pts += 1;
+                            tableData[m.awayId].pts += 1;
+                        }
+                    }
+                }
+            });
+
+            const sortedStandings = Object.values(tableData).sort((a,b) => b.pts - a.pts || b.gd - a.gd);
+            tableBody.innerHTML = '';
+            sortedStandings.forEach(row => {
+                tableBody.innerHTML += `
+                    <tr class="border-b border-slate-800/40 hover:bg-slate-900/20">
+                        <td class="py-2.5 font-sans font-semibold text-slate-200">${row.name}</td>
+                        <td class="text-center text-slate-400">${row.played}</td>
+                        <td class="text-center ${row.gd > 0 ? 'text-emerald-400' : row.gd < 0 ? 'text-rose-400' : 'text-slate-500'}">${row.gd > 0 ? '+' : ''}${row.gd}</td>
+                        <td class="text-right text-cyan-400 font-bold">${row.pts}</td>
+                    </tr>`;
+            });
+
+            // 2. Render Interactive Match Center Cards
+            fixturesContainer.innerHTML = fixturesList.length === 0 ? `<div class="text-center text-xs text-slate-500 py-12 border border-dashed border-slate-800 rounded">Fixtures schedule matrix uninitialized.</div>` : '';
+            
+            // Group fixtures clean by chronological round tracking
+            let currentRenderedRound = 0;
+
+            fixturesList.sort((a,b) => a.round - b.round).forEach(match => {
+                if(match.round !== currentRenderedRound) {
+                    currentRenderedRound = match.round;
+                    fixturesContainer.innerHTML += `<div class="text-slate-500 text-[10px] tracking-widest font-bold uppercase pt-4 pb-1 border-b border-slate-800/60">ROUND ${currentRenderedRound}</div>`;
+                }
+
+                const isParticipant = userData.uid === match.homeId || userData.uid === match.awayId;
+                const wasReporter = match.reportedBy === userData.uid;
+                
+                let badgeStyle = "bg-slate-800 text-slate-400";
+                if(match.status === "Pending") badgeStyle = "bg-amber-950 text-amber-400 animate-pulse border border-amber-800/30";
+                if(match.status === "Approved") badgeStyle = "bg-emerald-950 text-emerald-400 border border-emerald-900/40";
+
+                let interfaceHTML = '';
+                if(match.status === "Scheduled" && isParticipant) {
+                    interfaceHTML = `
+                        <div class="flex items-center gap-2 mt-2 pt-2 border-t border-slate-900">
+                            <input type="number" placeholder="H" id="score-h-${match.id}" class="w-10 bg-slate-900 border border-slate-700 text-xs p-1 text-center font-bold rounded text-white focus:outline-none">
+                            <span class="text-slate-600 font-bold">:</span>
+                            <input type="number" placeholder="A" id="score-a-${match.id}" class="w-10 bg-slate-900 border border-slate-700 text-xs p-1 text-center font-bold rounded text-white focus:outline-none">
+                            <button onclick="reportMatchScore('${match.id}')" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 text-[10px] font-bold px-3 py-1 rounded tracking-wider uppercase transition ml-auto">Submit</button>
+                        </div>`;
+                } else if(match.status === "Pending") {
+                    if(isParticipant && !wasReporter) {
+                        interfaceHTML = `
+                            <div class="flex gap-2 mt-2 pt-2 border-t border-slate-900 items-center justify-between">
+                                <span class="text-[10px] text-amber-400/80 italic">Confirm opponent data?</span>
+                                <div class="flex gap-1">
+                                    <button onclick="disputeMatchScore('${match.id}')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 text-[10px] font-semibold px-2 py-0.5 rounded border border-slate-700 transition">Reject</button>
+                                    <button onclick="approveMatchScore('${match.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-[10px] font-bold px-3 py-0.5 rounded transition uppercase">Approve</button>
+                                </div>
+                            </div>`;
+                    } else {
+                        interfaceHTML = `<div class="text-[10px] text-slate-500 italic mt-1 text-right">Awaiting opponent peer validation...</div>`;
+                    }
+                }
+
+                fixturesContainer.innerHTML += `
+                    <div class="bg-slate-950/60 border border-slate-800/60 p-3.5 rounded-xl transition flex flex-col justify-between">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-4 w-5/6">
+                                <div class="w-2/5 text-xs text-right truncate font-medium ${match.status === 'Approved' && parseInt(match.homeScore) > parseInt(match.awayScore) ? 'text-cyan-400 font-bold' : 'text-slate-300'}">${match.homeName}</div>
+                                <div class="bg-slate-900 px-3 py-1 rounded font-mono font-bold text-xs border border-slate-800 min-w-[50px] text-center text-white">${match.homeScore} : ${match.awayScore}</div>
+                                <div class="w-2/5 text-xs text-left truncate font-medium ${match.status === 'Approved' && parseInt(match.awayScore) > parseInt(match.homeScore) ? 'text-cyan-400 font-bold' : 'text-slate-300'}">${match.awayName}</div>
+                            </div>
+                            <span class="text-[9px] font-bold font-mono px-2 py-0.5 rounded uppercase ${badgeStyle}">${match.status}</span>
+                        </div>
+                        ${interfaceHTML}
+                    </div>`;
+            });
+        }
+
+        function reportMatchScore(mId) {
+            const hInput = document.getElementById(`score-h-${mId}`).value;
+            const aInput = document.getElementById(`score-a-${mId}`).value;
+            if(hInput === '' || aInput === '') return alert("Please specify integer numeric inputs for both teams.");
+
+            db.ref(`fixtures/${mId}`).update({
+                homeScore: parseInt(hInput),
+                awayScore: parseInt(aInput),
+                status: "Pending",
+                reportedBy: userData.uid
+            });
+        }
+
+        function approveMatchScore(mId) {
+            db.ref(`fixtures/${mId}`).update({ status: "Approved" });
+        }
+
+        function disputeMatchScore(mId) {
+            if(!confirm("Reset match entry data back to empty status parameters?")) return;
+            db.ref(`fixtures/${mId}`).update({
+                homeScore: "-", awayScore: "-",
+                status: "Scheduled", reportedBy: ""
+            });
+        }
+
+        function advanceSeason() {
+            if (!confirm("⚠️ Transition tournament ecosystem state to next Season iteration structure safely?")) return;
+            const updatePayload = {};
+            players.forEach(p => {
+                let currentRemaining = p.contractRemaining;
+                if (p.highestBidderId !== "" && currentRemaining === 0) {
+                    currentRemaining = p.contractYearsSelected;
+                }
+                if (currentRemaining > 0) {
+                    const nextRemaining = currentRemaining - 1;
+                    if (nextRemaining > 0) {
+                        updatePayload[`players/${p.id}/contractRemaining`] = nextRemaining;
+                        updatePayload[`players/${p.id}/status`] = "Locked";
+                    } else {
+                        updatePayload[`players/${p.id}/contractRemaining`] = 0;
+                        updatePayload[`players/${p.id}/highestBidderId`] = "";
+                        updatePayload[`players/${p.id}/highestBidderName`] = "No Bids";
+                        updatePayload[`players/${p.id}/status`] = "Available";
+                        updatePayload[`players/${p.id}/currentBid`] = p.basePrice; 
+                    }
+                }
+            });
+
+            const nextDeadline = Date.now() + (24 * 60 * 60 * 1000);
+            updatePayload['systemSettings/currentSeason'] = currentSeason + 1;
+            updatePayload['systemSettings/auctionDeadline'] = nextDeadline;
+            // Clean up old matches history nodes cleanly
+            updatePayload['fixtures'] = null;
+
+            db.ref().update(updatePayload).then(() => alert(`Initialized Season ${currentSeason + 1}!`));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.className = 'tab-btn text-slate-400 hover:text-white pb-1');
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            event.target.className = 'tab-btn text-cyan-400 border-b-2 border-cyan-400 pb-1';
         }
     </script>
 </body>
