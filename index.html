@@ -80,17 +80,28 @@
                     <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">Tournament Master Dashboard</h3>
                     <p class="text-xs text-slate-500">Manage league generation, CSV registers, and seasonal transitions.</p>
                 </div>
-                <div class="flex flex-wrap gap-3">
+                <div class="flex flex-wrap gap-3 items-center">
                     <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="handleCSV(event)">
-                    <label for="csv-file" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2 rounded cursor-pointer font-medium border border-slate-600 transition text-slate-200">
+                    <label for="csv-file" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2.5 rounded cursor-pointer font-medium border border-slate-600 transition text-slate-200">
                         Upload Fresh Players CSV
                     </label>
-                    <button onclick="generateFixtures()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded transition shadow">
+                    <button onclick="generateFixtures()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded transition shadow">
                         🗓️ Generate League Fixtures
                     </button>
-                    <button onclick="advanceSeason()" class="bg-gradient-to-r from-amber-600 to-orange-600 text-slate-950 text-xs font-bold px-4 py-2 rounded shadow hover:opacity-90 transition">
+                    <button onclick="advanceSeason()" class="bg-gradient-to-r from-amber-600 to-orange-600 text-slate-950 text-xs font-bold px-4 py-2.5 rounded shadow hover:opacity-90 transition">
                         ⏩ Advance to Next Season
                     </button>
+
+                    <!-- Dynamic Auction Deadline Selector -->
+                    <div class="flex items-center gap-2 border-l border-slate-800 pl-3">
+                        <div class="flex flex-col">
+                            <label class="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">Auction Deadline</label>
+                            <input type="datetime-local" id="admin-deadline-input" class="bg-slate-900 border border-slate-700 text-xs p-1.5 rounded text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <button onclick="setNewDeadline()" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 text-xs font-bold px-3 py-2 rounded transition shadow mt-4 self-end">
+                            Set Timer
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -315,6 +326,16 @@
                 currentSeason = settings.currentSeason || 1;
                 auctionDeadline = settings.auctionDeadline || new Date("July 13, 2026 14:00:00").getTime();
                 document.getElementById('nav-season-badge').innerText = `Season ${currentSeason}`;
+                
+                // Pre-populate the admin input box with the current database time
+                const deadlineInput = document.getElementById('admin-deadline-input');
+                if (deadlineInput && auctionDeadline) {
+                    const dateObj = new Date(auctionDeadline);
+                    const tzOffset = dateObj.getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(dateObj - tzOffset)).toISOString().slice(0, 16);
+                    deadlineInput.value = localISOTime;
+                }
+
                 startTimerEngine();
             });
 
@@ -352,6 +373,7 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
                 banner.innerText = `⏱️ AUCTION STATUS: CLOSING IN ${hours}h ${minutes}m ${seconds}s ⏱️`;
+                banner.className = "bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all";
             }, 1000);
         }
 
@@ -560,6 +582,23 @@
                 status: "Active Bidding",
                 contractYearsSelected: chosenYears
             });
+        }
+
+        // Custom timer update utility function
+        function setNewDeadline() {
+            const inputVal = document.getElementById('admin-deadline-input').value;
+            if(!inputVal) return alert("Please select a valid date and time.");
+            
+            // Convert the local input string to a millisecond timestamp
+            const timestamp = new Date(inputVal).getTime();
+            if(isNaN(timestamp)) return alert("Invalid date parameters detected.");
+            
+            // Save dynamically to your Firebase real-time database
+            db.ref('systemSettings').update({
+                auctionDeadline: timestamp
+            }).then(() => {
+                alert("⏰ Auction schedule updated! All managers will see the new live countdown.");
+            }).catch(err => alert("Error updating schedule: " + err.message));
         }
 
         // Home/Away Round-Robin Generator Engine
