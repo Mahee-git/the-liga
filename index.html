@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eFootball Live Auction Hub</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -20,12 +17,10 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
-    <!-- Live Global Countdown Ticker -->
     <div id="countdown-banner" class="bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all">
         Loading System State...
     </div>
 
-    <!-- Navbar -->
     <nav class="bg-slate-950 border-b border-cyan-500/30 p-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <h1 class="gaming-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-wider">
@@ -43,10 +38,8 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto p-4 md:p-6">
 
-        <!-- AUTH PORTAL -->
         <div id="auth-section" class="max-w-md mx-auto my-12 bg-slate-950 p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
             <div class="flex justify-center gap-4 mb-6 border-b border-slate-800 pb-4">
                 <button id="toggle-login-btn" onclick="toggleAuthMode('login')" class="text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1">Sign In</button>
@@ -71,10 +64,8 @@
             </div>
         </div>
 
-        <!-- MAIN INTERFACE -->
         <div id="app-interface" class="hidden space-y-6">
             
-            <!-- ADMIN CONTROL MODULE -->
             <div id="admin-controls-panel" class="bg-slate-950 p-4 rounded-xl border border-dashed border-red-500/30 flex flex-wrap gap-4 justify-between items-center hidden">
                 <div>
                     <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">Tournament Master Dashboard</h3>
@@ -92,7 +83,6 @@
                         ⏩ Advance to Next Season
                     </button>
 
-                    <!-- Dynamic Auction Deadline Selector -->
                     <div class="flex items-center gap-2 border-l border-slate-800 pl-3">
                         <div class="flex flex-col">
                             <label class="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">Auction Deadline</label>
@@ -105,12 +95,10 @@
                 </div>
             </div>
 
-            <!-- DASHBOARD TAB -->
             <section id="tab-dashboard" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4 h-fit">
                     <h2 class="gaming-font text-lg font-bold text-cyan-400">Club Standings</h2>
                     
-                    <!-- View Other Squads Selector -->
                     <div>
                         <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Select Roster View Focus</label>
                         <select id="squad-focus-selector" onchange="updateDashboardView()" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500"></select>
@@ -121,7 +109,6 @@
                         <p id="dash-team-name" class="text-xl font-bold text-white">-</p>
                     </div>
                     
-                    <!-- Persistent Wallet Display -->
                     <div class="bg-slate-900 p-4 rounded border border-emerald-500/20">
                         <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Available Transfer Budget</p>
                         <p id="dash-balance" class="text-3xl font-bold text-white mt-1">200M</p>
@@ -129,7 +116,6 @@
                     </div>
                 </div>
 
-                <!-- Display Squad Sorted dynamically from CF to GK -->
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
                     <h2 class="gaming-font text-lg font-bold text-emerald-400 mb-4 flex justify-between items-center">
                         <span>Active Squad Roster Layout</span>
@@ -151,7 +137,6 @@
                 </div>
             </section>
 
-            <!-- TRANSFER MARKET -->
             <section id="tab-market" class="tab-content hidden space-y-6">
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4">
                     <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:outline-none focus:border-cyan-500">
@@ -165,11 +150,9 @@
                 <div id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
-            <!-- FIXTURES & STANDINGS TAB -->
             <section id="tab-stats" class="tab-content hidden space-y-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
-                    <!-- DYNAMIC LEAGUE STANDINGS TABLE -->
                     <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-1 h-fit">
                         <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">League Standings Table</h3>
                         <div class="overflow-x-auto">
@@ -187,7 +170,6 @@
                         </div>
                     </div>
 
-                    <!-- MUTUAL PEER-REVIEW FIXTURE SCHEDULER -->
                     <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
                         <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">Fixture Management Center</h3>
                         <div id="fixtures-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
@@ -369,10 +351,20 @@
                     updateDashboardView();
                     return;
                 }
+                
+                // Fixed: Added logic to track full day blocks alongside hours, minutes, and seconds
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                banner.innerText = `⏱️ AUCTION STATUS: CLOSING IN ${hours}h ${minutes}m ${seconds}s ⏱️`;
+                
+                let timeString = "";
+                if (days > 0) {
+                    timeString += `${days}d `;
+                }
+                timeString += `${hours}h ${minutes}m ${seconds}s`;
+
+                banner.innerText = `⏱️ AUCTION STATUS: CLOSING IN ${timeString} ⏱️`;
                 banner.className = "bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all";
             }, 1000);
         }
@@ -529,7 +521,6 @@
                             ` : ''}
                         </div>
 
-                        <!-- 1M/2M Tactical increments -->
                         <div class="space-y-2 mt-2 pt-3 border-t border-slate-900/60">
                             <div class="flex gap-2">
                                 <input type="number" id="bid-input-${player.id}" placeholder="Custom Millions" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white text-center font-mono focus:outline-none" ${disabledAttr}>
