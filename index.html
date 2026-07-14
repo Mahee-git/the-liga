@@ -3,62 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eFootball Live Auction Hub</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>eFootball Live Auction & Tournament Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
         .gaming-font { font-family: 'Orbitron', sans-serif; }
+        /* Custom smooth scrollbar for premium feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-24 md:pb-6">
 
     <div id="countdown-banner" class="bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all">
         Loading System State...
     </div>
 
-    <nav class="bg-slate-950 border-b border-cyan-500/30 p-4 sticky top-0 z-50">
+    <nav class="bg-slate-950 border-b border-cyan-500/30 p-4 sticky top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="gaming-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-wider">
-                eFOOTBALL LIVE <span id="nav-season-badge" class="text-xs bg-slate-800 text-cyan-400 px-2 py-0.5 rounded ml-2">Season 1</span>
+            <h1 class="gaming-font text-lg md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-wider">
+                eFOOTBALL LIVE <span id="nav-season-badge" class="text-[10px] md:text-xs bg-slate-800 text-cyan-400 px-2 py-0.5 rounded ml-1 md:ml-2">Season 1</span>
             </h1>
-            <div id="nav-links" class="hidden flex gap-6 text-sm font-semibold">
-                <button onclick="switchTab('dashboard')" class="tab-btn text-cyan-400 border-b-2 border-cyan-400 pb-1">Dashboard</button>
-                <button onclick="switchTab('market')" class="tab-btn text-slate-400 hover:text-white pb-1">Bidding Market</button>
-                <button onclick="switchTab('stats')" class="tab-btn text-slate-400 hover:text-white pb-1">Fixtures & Standings</button>
+            <div id="nav-links" class="hidden md:flex gap-6 text-sm font-semibold">
+                <button onclick="switchTab('dashboard')" class="tab-btn text-cyan-400 border-b-2 border-cyan-400 pb-1 cursor-pointer">Dashboard</button>
+                <button onclick="switchTab('market')" class="tab-btn text-slate-400 hover:text-white pb-1 cursor-pointer">Bidding Market</button>
+                <button onclick="switchTab('stats')" class="tab-btn text-slate-400 hover:text-white pb-1 cursor-pointer">Fixtures & Standings</button>
+                <button onclick="switchTab('tournament')" class="tab-btn text-slate-400 hover:text-white pb-1 cursor-pointer">Tournament Archives</button>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="nav-user" class="text-xs bg-slate-800 px-3 py-1.5 rounded border border-slate-700">Not Logged In</div>
-                <button id="logout-btn" onclick="logout()" class="hidden text-xs text-rose-400 hover:underline">Logout</button>
+            <div class="flex items-center gap-2 md:gap-4">
+                <div id="nav-user" class="text-[10px] md:text-xs bg-slate-800 px-2.5 py-1.5 rounded border border-slate-700 truncate max-w-[120px] md:max-w-none">Not Logged In</div>
+                <button id="logout-btn" onclick="logout()" class="hidden text-[10px] md:text-xs text-rose-400 hover:underline cursor-pointer font-semibold">Logout</button>
             </div>
         </div>
     </nav>
 
+    <div id="mobile-nav" class="hidden md:hidden fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-cyan-500/30 flex justify-around py-3 z-50 backdrop-blur-md bg-opacity-90">
+        <button onclick="switchTab('dashboard')" class="mobile-tab-btn flex flex-col items-center gap-1 text-cyan-400 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" /></svg>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Dashboard</span>
+        </button>
+        <button onclick="switchTab('market')" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Market</span>
+        </button>
+        <button onclick="switchTab('stats')" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            <span class="text-[9px] font-bold uppercase tracking-wider">Fixtures</span>
+        </button>
+        <button onclick="switchTab('tournament')" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0H4m8 0h8" /></svg>
+            <span class="text-[9px] font-bold uppercase tracking-wider">LIGA Tourney</span>
+        </button>
+    </div>
+
     <main class="max-w-7xl mx-auto p-4 md:p-6">
 
-        <div id="auth-section" class="max-w-md mx-auto my-12 bg-slate-950 p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
+        <div id="auth-section" class="max-w-md mx-auto my-8 md:my-12 bg-slate-950 p-6 md:p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
             <div class="flex justify-center gap-4 mb-6 border-b border-slate-800 pb-4">
-                <button id="toggle-login-btn" onclick="toggleAuthMode('login')" class="text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1">Sign In</button>
-                <button id="toggle-signup-btn" onclick="toggleAuthMode('signup')" class="text-slate-400 font-bold text-sm uppercase tracking-wider pb-1">Create Account</button>
+                <button id="toggle-login-btn" onclick="toggleAuthMode('login')" class="text-cyan-400 font-bold text-xs md:text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1 cursor-pointer">Sign In</button>
+                <button id="toggle-signup-btn" onclick="toggleAuthMode('signup')" class="text-slate-400 font-bold text-xs md:text-sm uppercase tracking-wider pb-1 cursor-pointer">Create Account</button>
             </div>
             <div class="space-y-4">
                 <div id="signup-name-field" class="hidden">
                     <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Manager / Team Name</label>
-                    <input type="text" id="auth-name" placeholder="e.g., Dhaka Galácticos" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
+                    <input type="text" id="auth-name" placeholder="e.g., Dhaka Galácticos" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white text-sm focus:outline-none focus:border-cyan-500">
                 </div>
                 <div>
                     <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Email Address</label>
-                    <input type="email" id="auth-email" placeholder="name@example.com" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
+                    <input type="email" id="auth-email" placeholder="name@example.com" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white text-sm focus:outline-none focus:border-cyan-500">
                 </div>
                 <div>
                     <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Password</label>
-                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
+                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white text-sm focus:outline-none focus:border-cyan-500">
                 </div>
-                <button id="auth-submit-btn" onclick="handleAuth()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 font-bold py-3 rounded cursor-pointer hover:opacity-90 text-sm uppercase tracking-widest text-slate-950">
+                <button id="auth-submit-btn" onclick="handleAuth()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 font-bold py-3 rounded cursor-pointer hover:opacity-90 text-xs md:text-sm uppercase tracking-widest text-slate-950 transition">
                     Sign In
                 </button>
             </div>
@@ -66,65 +102,90 @@
 
         <div id="app-interface" class="hidden space-y-6">
             
-            <div id="admin-controls-panel" class="bg-slate-950 p-4 rounded-xl border border-dashed border-red-500/30 flex flex-wrap gap-4 justify-between items-center hidden">
-                <div>
-                    <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">Tournament Master Dashboard</h3>
-                    <p class="text-xs text-slate-500">Manage league generation, CSV registers, and seasonal transitions.</p>
+            <div id="admin-controls-panel" class="bg-slate-950 p-4 rounded-xl border border-dashed border-red-500/30 flex flex-col gap-4 justify-between items-stretch md:flex-row md:items-center hidden">
+                <div class="text-center md:text-left">
+                    <h3 class="text-xs md:text-sm font-bold text-red-400 uppercase tracking-wider">Tournament Master Dashboard</h3>
+                    <p class="text-[10px] md:text-xs text-slate-500">Manage league generation, CSV registers, and seasonal transitions.</p>
                 </div>
-                <div class="flex flex-wrap gap-3 items-center">
+                <div class="flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-center justify-center">
                     <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="handleCSV(event)">
-                    <label for="csv-file" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2.5 rounded cursor-pointer font-medium border border-slate-600 transition text-slate-200">
+                    <label for="csv-file" class="bg-slate-800 hover:bg-slate-700 text-[10px] md:text-xs px-4 py-2.5 rounded cursor-pointer font-medium border border-slate-600 transition text-slate-200 text-center">
                         Upload Fresh Players CSV
                     </label>
-                    <button onclick="generateFixtures()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded transition shadow">
+                    <button onclick="generateFixtures()" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] md:text-xs font-bold px-4 py-2.5 rounded transition shadow cursor-pointer">
                         🗓️ Generate League Fixtures
                     </button>
-                    <button onclick="advanceSeason()" class="bg-gradient-to-r from-amber-600 to-orange-600 text-slate-950 text-xs font-bold px-4 py-2.5 rounded shadow hover:opacity-90 transition">
+                    <button onclick="advanceSeason()" class="bg-gradient-to-r from-amber-600 to-orange-600 text-slate-950 text-[10px] md:text-xs font-bold px-4 py-2.5 rounded shadow hover:opacity-90 transition cursor-pointer">
                         ⏩ Advance to Next Season
                     </button>
 
-                    <div class="flex items-center gap-2 border-l border-slate-800 pl-3">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-3">
                         <div class="flex flex-col">
-                            <label class="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">Auction Deadline</label>
-                            <input type="datetime-local" id="admin-deadline-input" class="bg-slate-900 border border-slate-700 text-xs p-1.5 rounded text-white focus:outline-none focus:border-cyan-500">
+                            <label class="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5 text-center sm:text-left">Auction Deadline</label>
+                            <input type="datetime-local" id="admin-deadline-input" class="bg-slate-900 border border-slate-700 text-[11px] p-1.5 rounded text-white focus:outline-none focus:border-cyan-500 text-center">
                         </div>
-                        <button onclick="setNewDeadline()" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 text-xs font-bold px-3 py-2 rounded transition shadow mt-4 self-end">
+                        <button onclick="setNewDeadline()" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 text-[10px] md:text-xs font-bold px-3 py-2 rounded transition shadow mt-1 sm:mt-4 self-stretch sm:self-end cursor-pointer">
                             Set Timer
                         </button>
                     </div>
                 </div>
             </div>
 
-            <section id="tab-dashboard" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4 h-fit">
-                    <h2 class="gaming-font text-lg font-bold text-cyan-400">Club Standings</h2>
-                    
-                    <div>
-                        <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Select Roster View Focus</label>
-                        <select id="squad-focus-selector" onchange="updateDashboardView()" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500"></select>
+            <section id="tab-dashboard" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-slate-950 p-5 md:p-6 rounded-xl border border-slate-800 space-y-4 h-fit">
+                        <h2 class="gaming-font text-base md:text-lg font-bold text-cyan-400 uppercase tracking-wider">Club Standings</h2>
+                        
+                        <div>
+                            <label class="block text-[9px] md:text-[10px] uppercase tracking-wider text-slate-500 mb-1.5 font-bold">Select Roster View Focus</label>
+                            <select id="squad-focus-selector" onchange="updateDashboardView()" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500"></select>
+                        </div>
+
+                        <div class="border-t border-slate-800 pt-3">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-wider">Manager Status</p>
+                            <p id="dash-team-name" class="text-lg md:text-xl font-bold text-white">-</p>
+                        </div>
+                        
+                        <div class="bg-slate-900 p-4 rounded border border-emerald-500/20">
+                            <p class="text-[10px] text-emerald-400 uppercase tracking-wider font-semibold">Available Transfer Budget</p>
+                            <p id="dash-balance" class="text-2xl md:text-3xl font-bold text-white mt-1">200M</p>
+                            <p id="dash-pending-bids" class="text-[9px] md:text-[10px] text-slate-400 mt-1 italic leading-tight">Active season bids: 0M</p>
+                        </div>
                     </div>
 
-                    <div class="border-t border-slate-800 pt-3">
-                        <p class="text-xs text-slate-400 uppercase">Manager Status</p>
-                        <p id="dash-team-name" class="text-xl font-bold text-white">-</p>
-                    </div>
-                    
-                    <div class="bg-slate-900 p-4 rounded border border-emerald-500/20">
-                        <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Available Transfer Budget</p>
-                        <p id="dash-balance" class="text-3xl font-bold text-white mt-1">200M</p>
-                        <p id="dash-pending-bids" class="text-[10px] text-slate-400 mt-1 italic">Active season bids: 0M</p>
+                    <div class="bg-slate-950 p-5 md:p-6 rounded-xl border border-slate-800 space-y-3">
+                        <h2 class="gaming-font text-xs md:text-sm font-bold text-cyan-400 uppercase tracking-wider flex justify-between items-center">
+                            <span>My Live Bids Leading</span>
+                            <span class="text-[9px] bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded font-mono font-normal">Pending</span>
+                        </h2>
+                        <p class="text-[10px] md:text-xs text-slate-400 leading-relaxed">
+                            These are the live targets you are currently leading. If another manager outbids you, they will disappear instantly from here.
+                        </p>
+                        <div class="overflow-x-auto max-h-[250px] overflow-y-auto pr-1">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="text-[9px] md:text-[10px] text-slate-500 border-b border-slate-800 uppercase font-mono">
+                                        <th class="pb-2 font-bold">Player</th>
+                                        <th class="pb-2 text-center font-bold">Pos</th>
+                                        <th class="pb-2 text-right font-bold">Your Bid</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leading-bids-list" class="divide-y divide-slate-800/50"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
-                    <h2 class="gaming-font text-lg font-bold text-emerald-400 mb-4 flex justify-between items-center">
-                        <span>Active Squad Roster Layout</span>
-                        <span class="text-xs font-sans text-slate-500 font-normal">Sorted: CF ➔ GK</span>
+                <div class="lg:col-span-5 bg-slate-950 p-5 md:p-6 rounded-xl border border-slate-800">
+                    <h2 class="gaming-font text-base md:text-lg font-bold text-emerald-400 mb-4 flex justify-between items-center">
+                        <span>Active Squad Roster</span>
+                        <span class="text-[10px] font-sans text-slate-500 font-normal">Sorted: CF ➔ GK</span>
                     </h2>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
+                        <table class="w-full text-left text-xs md:text-sm min-w-[320px]">
                             <thead>
-                                <tr class="text-xs text-slate-500 border-b border-slate-800 uppercase">
+                                <tr class="text-[10px] md:text-xs text-slate-500 border-b border-slate-800 uppercase">
                                     <th class="pb-2">Player Info</th>
                                     <th class="pb-2 text-center">Position</th>
                                     <th class="pb-2 text-center">Contract Rest</th>
@@ -135,44 +196,421 @@
                         </table>
                     </div>
                 </div>
+
+                <div class="lg:col-span-3 bg-slate-950 p-5 md:p-6 rounded-xl border border-slate-800 space-y-4 h-fit">
+                    <h2 class="gaming-font text-xs md:text-sm font-bold text-rose-400 uppercase tracking-wider flex justify-between items-center">
+                        <span>Global Top Bids</span>
+                        <span class="text-[9px] bg-rose-950 text-rose-400 px-2 py-0.5 rounded font-mono font-normal">Active League</span>
+                    </h2>
+                    <p class="text-[10px] md:text-xs text-slate-400 leading-relaxed">
+                        A real-time ticker displaying the highest bid placements currently committed across the entire system database.
+                    </p>
+                    <div class="overflow-x-auto max-h-[350px] md:max-h-[500px] overflow-y-auto pr-1">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-[9px] md:text-[10px] text-slate-500 border-b border-slate-800 uppercase font-mono">
+                                    <th class="pb-2 font-bold">Player</th>
+                                    <th class="pb-2 text-right font-bold">Top Bid</th>
+                                    <th class="pb-2 text-right font-bold">Bidder</th>
+                                </tr>
+                            </thead>
+                            <tbody id="global-bids-list" class="divide-y divide-slate-800/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </section>
 
             <section id="tab-market" class="tab-content hidden space-y-6">
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4">
-                    <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:outline-none focus:border-cyan-500">
-                    <select id="position-filter" onchange="renderMarket()" class="bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-300">
+                    <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                    <select id="position-filter" onchange="renderMarket()" class="bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-slate-300">
                         <option value="">All Positions</option>
                         <option value="CF">CF</option><option value="LWF">LWF</option><option value="RWF">RWF</option>
                         <option value="AMF">AMF</option><option value="CMF">CMF</option><option value="DMF">DMF</option>
-                        <option value="CB">CB</option><option value="LB">LB</option><option value="RB">RB</option><option value="GK">GK</option>
+                        <option value="CB">CB</option><option value="LB">LB</option><option value="RB">RB</option>
+                        <option value="GK">GK</option>
                     </select>
                 </div>
-                <div id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
 
-            <section id="tab-stats" class="tab-content hidden space-y-8">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <section id="tab-stats" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-4 bg-slate-950 p-5 rounded-xl border border-slate-800 h-fit space-y-4">
+                    <h2 class="gaming-font text-base md:text-lg font-bold text-cyan-400 border-b border-slate-800 pb-2">Active League Table</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs sm:text-sm">
+                            <thead>
+                                <tr class="text-[10px] text-slate-500 border-b border-slate-800 uppercase">
+                                    <th class="pb-2">Club</th>
+                                    <th class="pb-2 text-center">MP</th>
+                                    <th class="pb-2 text-center">GD</th>
+                                    <th class="pb-2 text-right">Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody id="league-table-body" class="divide-y divide-slate-800/40"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8 bg-slate-950 p-5 rounded-xl border border-slate-800">
+                    <h2 class="gaming-font text-base md:text-lg font-bold text-blue-400 border-b border-slate-800 pb-2 mb-4">League Schedule Drawer</h2>
+                    <div id="fixtures-container" class="space-y-4"></div>
+                </div>
+            </section>
+
+            <section id="tab-tournament" class="tab-content hidden">
+                <div x-data="tournamentApp()" class="space-y-6">
                     
-                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-1 h-fit">
-                        <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">League Standings Table</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
-                                <thead>
-                                    <tr class="text-slate-500 border-b border-slate-800 uppercase">
-                                        <th class="pb-2">Club</th>
-                                        <th class="pb-2 text-center">P</th>
-                                        <th class="pb-2 text-center">GD</th>
-                                        <th class="pb-2 text-right">Pts</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="league-table-body" class="divide-y divide-slate-800/50 font-mono"></tbody>
-                            </table>
+                    <div class="relative overflow-hidden rounded-2xl p-6 mb-6 shadow-2xl border"
+                         :class="activeSeason === 1 ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 border-yellow-500/30' : 'bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-500 border-emerald-500/30'">
+                        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent animate-pulse"></div>
+                        <div class="relative flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl" x-text="activeSeason === 1 ? '👑' : '🔥'"></span>
+                                <div>
+                                    <span class="text-xs uppercase tracking-widest font-black text-slate-950 block">LIGA WC26 Historical Record</span>
+                                    <h2 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight" x-text="'Season ' + activeSeason"></h2>
+                                </div>
+                            </div>
+                            <div class="bg-slate-950/80 px-4 py-2.5 rounded-lg border border-white/10 text-center sm:text-right">
+                                <span x-show="activeSeason === 1" class="text-xs text-slate-300">Winner: <strong class="text-amber-400">Aymaan (Netherlands)</strong> 🎉</span>
+                                <span x-show="activeSeason === 2" class="text-xs text-slate-300">Status: <strong class="text-emerald-400">Tournament Completed</strong></span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
-                        <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">Fixture Management Center</h3>
-                        <div id="fixtures-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <div class="flex gap-2">
+                            <button @click="activeTab = 'standings'" :class="activeTab === 'standings' ? 'bg-emerald-600 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'" class="px-4 py-2 rounded text-xs font-bold transition">🛡️ Standings</button>
+                            <button @click="activeTab = 'fixtures'" :class="activeTab === 'fixtures' ? 'bg-emerald-600 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'" class="px-4 py-2 rounded text-xs font-bold transition">🗓️ Matches</button>
+                            <button @click="activeTab = 'stats'" :class="activeTab === 'stats' ? 'bg-emerald-600 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'" class="px-4 py-2 rounded text-xs font-bold transition">📊 Performance</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Switch Tournament:</span>
+                            <select x-model.number="activeSeason" class="bg-slate-900 border border-slate-700 text-xs rounded px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500">
+                                <option :value="1">Season 1 Tournament</option>
+                                <option :value="2">Season 2 Tournament</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div x-show="activeTab === 'standings'" class="grid grid-cols-1 lg:grid-cols-2 gap-6" x-transition>
+                        
+                        <div class="bg-slate-950 rounded-xl border border-slate-800 p-4 sm:p-5 shadow-xl">
+                            <h3 class="text-sm uppercase tracking-wider text-cyan-400 font-bold border-b border-slate-800 pb-2 mb-3">🛡️ Group A Standings</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs sm:text-sm min-w-[300px]">
+                                    <thead>
+                                        <tr class="text-slate-500 border-b border-slate-800 uppercase tracking-wider text-[10px]">
+                                            <th class="pb-2 font-semibold">Team / Manager</th>
+                                            <th class="pb-2 text-center w-8">MP</th>
+                                            <th class="pb-2 text-center w-8">W</th>
+                                            <th class="pb-2 text-center w-8">D</th>
+                                            <th class="pb-2 text-center w-8">L</th>
+                                            <th class="pb-2 text-center w-10">GD</th>
+                                            <th class="pb-2 text-center w-10 text-emerald-400 font-bold">Pts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(team, idx) in getSortedGroup('A')" :key="team.id">
+                                            <tr class="border-b border-slate-900 hover:bg-slate-900/30">
+                                                <td class="py-2.5">
+                                                    <div class="font-bold text-white text-xs sm:text-sm" x-text="team.name"></div>
+                                                    <div class="text-[10px] text-slate-500" x-text="team.player"></div>
+                                                </td>
+                                                <td class="py-2.5 text-center text-slate-300 font-mono" x-text="team.mp"></td>
+                                                <td class="py-2.5 text-center text-slate-400 font-mono" x-text="team.w"></td>
+                                                <td class="py-2.5 text-center text-slate-400 font-mono" x-text="team.d"></td>
+                                                <td class="py-2.5 text-center text-slate-400 font-mono" x-text="team.l"></td>
+                                                <td class="py-2.5 text-center font-bold font-mono" :class="team.gd > 0 ? 'text-emerald-400' : (team.gd < 0 ? 'text-rose-400' : 'text-slate-400')" x-text="(team.gd > 0 ? '+' : '') + team.gd"></td>
+                                                <td class="py-2.5 text-center text-emerald-400 font-bold font-mono bg-slate-900/30 rounded" x-text="team.pts"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 rounded-xl border border-slate-800 p-4 sm:p-5 shadow-xl">
+                            <h3 class="text-sm uppercase tracking-wider text-cyan-400 font-bold border-b border-slate-800 pb-2 mb-3">🛡️ Group B Standings</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs sm:text-sm min-w-[300px]">
+                                    <thead>
+                                        <tr class="text-slate-500 border-b border-slate-800 uppercase tracking-wider text-[10px]">
+                                            <th class="pb-2 font-semibold">Team / Manager</th>
+                                            <th class="pb-2 text-center w-8">MP</th>
+                                            <th class="pb-2 text-center w-8">W</th>
+                                            <th class="pb-2 text-center w-8">D</th>
+                                            <th class="pb-2 text-center w-8">L</th>
+                                            <th class="pb-2 text-center w-10">GD</th>
+                                            <th class="pb-2 text-center w-10 text-emerald-400 font-bold">Pts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(team, idx) in getSortedGroup('B')" :key="team.id">
+                                            <tr class="border-b border-slate-900 hover:bg-slate-900/30">
+                                                <td class="py-2.5">
+                                                    <div class="font-bold text-white text-xs sm:text-sm" x-text="team.name"></div>
+                                                    <div class="text-[10px] text-slate-500" x-text="team.player"></div>
+                                                </td>
+                                                <td class="py-2.5 text-center text-slate-300 font-mono" x-text="team.mp"></td>
+                                                <td class="py-2.5 text-center text-slate-400 font-mono" x-text="team.w"></td>
+                                                <td class="py-2.5 text-center text-slate-400 font-mono" x-text="team.d"></td>
+                                                <td class="py-2.5 text-center text-slate-400 font-mono" x-text="team.l"></td>
+                                                <td class="py-2.5 text-center font-bold font-mono" :class="team.gd > 0 ? 'text-emerald-400' : (team.gd < 0 ? 'text-rose-400' : 'text-slate-400')" x-text="(team.gd > 0 ? '+' : '') + team.gd"></td>
+                                                <td class="py-2.5 text-center text-emerald-400 font-bold font-mono bg-slate-900/30 rounded" x-text="team.pts"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div x-show="activeTab === 'fixtures'" class="space-y-8" x-transition>
+                        
+                        <div class="bg-slate-950 rounded-xl border border-slate-800 p-5 shadow-xl">
+                            <h2 class="text-base font-bold border-b border-slate-800 pb-2.5 mb-5 text-emerald-400 flex justify-between items-center">
+                                <span class="flex items-center gap-1.5">🏆 Knockout Bracket (Playoffs)</span>
+                                <span class="text-[10px] text-slate-500 uppercase tracking-widest font-normal" x-text="'Season ' + activeSeason + ' Playoffs'"></span>
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                                <div class="space-y-4">
+                                    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">Semifinals</div>
+                                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-2 relative">
+                                        <div class="flex justify-between items-center text-[10px] text-emerald-400 font-bold">SF 1</div>
+                                        <template x-if="activeSeason === 1">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-slate-400">Nino (Brazil)</span>
+                                                    <span class="font-mono font-bold text-slate-400">0 (1)</span>
+                                                </div>
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-white font-bold">Anas (Argentina) ✅</span>
+                                                    <span class="font-mono font-bold text-emerald-400">0 (3)</span>
+                                                </div>
+                                                <div class="text-[9px] text-slate-500 border-t border-slate-800/60 pt-1 text-center">Pens: Anas won 3-1</div>
+                                            </div>
+                                        </template>
+                                        <template x-if="activeSeason === 2">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-white font-bold">Nino (Netherlands) ✅</span>
+                                                    <span class="font-mono font-bold text-emerald-400">3</span>
+                                                </div>
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-slate-400">Ayman (France)</span>
+                                                    <span class="font-mono font-bold text-slate-400">2</span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-2 relative">
+                                        <div class="flex justify-between items-center text-[10px] text-emerald-400 font-bold">SF 2</div>
+                                        <template x-if="activeSeason === 1">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-slate-400">Mahee (England)</span>
+                                                    <span class="font-mono font-bold text-slate-400">0</span>
+                                                </div>
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-white font-bold">Aymaan (Netherlands) ✅</span>
+                                                    <span class="font-mono font-bold text-emerald-400">1</span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="activeSeason === 2">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-white font-bold">Rsd (England) ✅</span>
+                                                    <span class="font-mono font-bold text-emerald-400">1 (5)</span>
+                                                </div>
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-slate-400">Anas (France)</span>
+                                                    <span class="font-mono font-bold text-slate-400">1 (4)</span>
+                                                </div>
+                                                <div class="text-[9px] text-slate-500 border-t border-slate-800/60 pt-1 text-center">Pens: Rsd won 5-4</div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="hidden md:flex flex-col items-center justify-center text-slate-700 select-none">
+                                    <span class="text-4xl">➔</span>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest text-amber-400">Grand Final</div>
+                                    <div class="bg-amber-950/20 border-2 border-amber-500/50 rounded-lg p-4 space-y-3 relative overflow-hidden">
+                                        <div class="absolute -right-6 -bottom-6 text-slate-800/10 text-6xl transform -rotate-12 select-none">🏆</div>
+                                        <div class="flex justify-between items-center text-[10px] text-amber-400 font-black tracking-widest uppercase">LIGA Championship Final</div>
+                                        <template x-if="activeSeason === 1">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-sm">
+                                                    <span class="text-white font-black">Aymaan (Neth) 👑</span>
+                                                    <span class="font-mono font-black text-amber-400">5</span>
+                                                </div>
+                                                <div class="flex justify-between text-sm">
+                                                    <span class="text-slate-400">Anas (Argentina)</span>
+                                                    <span class="font-mono font-bold text-white">4</span>
+                                                </div>
+                                                <div class="text-[9px] text-amber-300 font-medium border-t border-amber-900/40 pt-1.5 leading-tight">
+                                                    Stopped at 80'. Board Decision awarded victory to Aymaan.
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="activeSeason === 2">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-sm">
+                                                    <span class="text-white font-black">Rsd (England) 👑</span>
+                                                    <span class="font-mono font-black text-amber-400">4</span>
+                                                </div>
+                                                <div class="flex justify-between text-sm">
+                                                    <span class="text-slate-400 font-bold">Nino (Netherlands)</span>
+                                                    <span class="font-mono font-bold text-white">1</span>
+                                                </div>
+                                                <div class="text-[9px] text-amber-300 font-medium border-t border-amber-900/40 pt-1.5 leading-tight">
+                                                    Full-time: Rsd crowned Champion!
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">🗓️ Tournament Schedule & Performance Cards</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <template x-for="match in getActiveMatches()" :key="match.id">
+                                    <div x-data="{ openStats: false }" class="bg-slate-950 rounded-xl border border-slate-800 p-4 shadow hover:border-slate-700 transition duration-150">
+                                        <div class="flex justify-between items-center text-[10px] text-slate-500 mb-2.5">
+                                            <span class="font-bold tracking-wider text-emerald-400" x-text="match.stage ? match.stage : 'ROUND ' + match.round"></span>
+                                            <span class="px-2 py-0.5 rounded font-semibold tracking-wider uppercase" :class="match.isCancelled ? 'text-slate-400 bg-slate-900' : (match.played ? 'text-emerald-400 bg-emerald-950/20' : 'text-amber-400 bg-amber-950/20')" x-text="match.isCancelled ? 'Cancelled' : (match.played ? 'Full Time' : 'Upcoming')"></span>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-7 items-center gap-1">
+                                            <div class="col-span-3 text-right">
+                                                <span class="block font-black text-xs sm:text-sm text-white truncate" x-text="getTeamName(match.homeId)"></span>
+                                                <span class="block text-[10px] text-slate-500 truncate" x-text="getPlayerName(match.homeId)"></span>
+                                            </div>
+                                            <div class="col-span-1 bg-slate-900 py-1.5 rounded border border-slate-800 font-mono text-xs sm:text-sm font-bold flex justify-center items-center gap-0.5 min-w-[36px]">
+                                                <span class="text-white" x-text="(match.played && !match.isCancelled) ? match.homeScore : '-'"></span>
+                                                <span class="text-slate-600">:</span>
+                                                <span class="text-white" x-text="(match.played && !match.isCancelled) ? match.awayScore : '-'"></span>
+                                            </div>
+                                            <div class="col-span-3 text-left">
+                                                <span class="block font-black text-xs sm:text-sm text-white truncate" x-text="getTeamName(match.awayId)"></span>
+                                                <span class="block text-[10px] text-slate-500 truncate" x-text="getPlayerName(match.awayId)"></span>
+                                            </div>
+                                        </div>
+
+                                        <template x-if="match.penaltyText || match.specialNote">
+                                            <div class="mt-2 text-[10px] bg-slate-900/60 p-1.5 rounded text-center border border-slate-800 text-amber-300 font-mono" x-text="match.penaltyText || match.specialNote"></div>
+                                        </template>
+
+                                        <template x-if="match.played && !match.isCancelled && match.stats">
+                                            <div class="mt-3 pt-2.5 border-t border-slate-900 flex justify-center">
+                                                <button @click="openStats = !openStats" class="text-[10px] font-bold text-slate-400 hover:text-white uppercase tracking-widest flex items-center gap-1 cursor-pointer">
+                                                    <span x-text="openStats ? 'Hide Stats' : 'View Detailed Stats'"></span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transform transition" :class="openStats ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" /></svg>
+                                                </button>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="match.played && !match.isCancelled && match.stats">
+                                            <div x-show="openStats" x-collapse class="mt-3 bg-slate-900/50 rounded-lg p-3 space-y-2 border border-slate-800/60 text-xs">
+                                                <div>
+                                                    <div class="flex justify-between text-[10px] font-semibold text-slate-400 mb-1 font-mono">
+                                                        <span x-text="match.stats.homePossession + '%'"></span>
+                                                        <span>POSSESSION</span>
+                                                        <span x-text="match.stats.awayPossession + '%'"></span>
+                                                    </div>
+                                                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden flex">
+                                                        <div class="bg-cyan-500 h-full" :style="'width: ' + match.stats.homePossession + '%'"></div>
+                                                        <div class="bg-emerald-500 h-full" :style="'width: ' + match.stats.awayPossession + '%'"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex justify-between items-center text-[11px] py-1 border-b border-slate-900/60">
+                                                    <span class="font-mono text-slate-300 font-semibold" x-text="match.stats.homeShots"></span>
+                                                    <span class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Shots (Target)</span>
+                                                    <span class="font-mono text-slate-300 font-semibold" x-text="match.stats.awayShots + ' (' + match.stats.awayShotsOnTarget + ')'"></span>
+                                                </div>
+                                                <div class="flex justify-between items-center text-[11px] py-1 border-b border-slate-900/60">
+                                                    <span class="font-mono text-slate-300 font-semibold" x-text="match.stats.homeSuccessfulPasses + '/' + match.stats.homePasses"></span>
+                                                    <span class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Passes (Success)</span>
+                                                    <span class="font-mono text-slate-300 font-semibold" x-text="match.stats.awaySuccessfulPasses + '/' + match.stats.awayPasses"></span>
+                                                </div>
+                                                <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1 font-mono">
+                                                    <span class="text-cyan-400" x-text="match.stats.homePasses > 0 ? Math.round((match.stats.homeSuccessfulPasses / match.stats.homePasses) * 100) + '%' : '0%'"></span>
+                                                    <span>PASS ACCURACY</span>
+                                                    <span class="text-emerald-400" x-text="match.stats.awayPasses > 0 ? Math.round((match.stats.awaySuccessfulPasses / match.stats.awayPasses) * 100) + '%' : '0%'"></span>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div x-show="activeTab === 'stats'" class="grid grid-cols-1 md:grid-cols-3 gap-6" x-transition>
+                        
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-emerald-400 text-sm mb-3 border-b border-slate-800 pb-2 flex items-center gap-1.5">⚽ Top Scoring Teams</h3>
+                                <ol class="space-y-1.5 text-xs sm:text-sm">
+                                    <template x-for="(stat, idx) in getTopScoringTeams()" :key="idx">
+                                        <li class="flex justify-between p-2 bg-slate-900 rounded items-center">
+                                            <div class="truncate pr-2">
+                                                <span class="font-medium text-white block" x-text="(idx+1) + '. ' + stat.name"></span>
+                                                <span class="text-[9px] text-slate-500 block font-mono" x-text="'Played by: ' + stat.player"></span>
+                                            </div>
+                                            <span class="font-bold text-emerald-400 font-mono text-xs sm:text-sm" x-text="stat.goals + ' Goals'"></span>
+                                        </li>
+                                    </template>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-emerald-400 text-sm mb-3 border-b border-slate-800 pb-2 flex items-center gap-1.5">🎯 Shots on Target</h3>
+                                <ol class="space-y-1.5 text-xs sm:text-sm">
+                                    <template x-for="(stat, idx) in getTopShootingTeams()" :key="idx">
+                                        <li class="flex justify-between p-2 bg-slate-900 rounded items-center">
+                                            <div class="truncate pr-2">
+                                                <span class="font-medium text-white block" x-text="(idx+1) + '. ' + stat.name"></span>
+                                                <span class="text-[9px] text-slate-500 block font-mono" x-text="'Accuracy: ' + stat.accuracy + '%'"></span>
+                                            </div>
+                                            <span class="font-bold text-emerald-400 font-mono text-xs sm:text-sm" x-text="stat.shots + ' Shots'"></span>
+                                        </li>
+                                    </template>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-emerald-400 text-sm mb-3 border-b border-slate-800 pb-2 flex items-center gap-1.5">⚡ Pass Precision</h3>
+                                <ol class="space-y-1.5 text-xs sm:text-sm">
+                                    <template x-for="(stat, idx) in getPassingStats()" :key="idx">
+                                        <li class="flex justify-between p-2 bg-slate-900 rounded items-center">
+                                            <div class="truncate pr-2">
+                                                <span class="font-medium text-white block" x-text="(idx+1) + '. ' + stat.name"></span>
+                                                <span class="text-[9px] text-slate-500 block font-mono" x-text="'Completed: ' + stat.successful + '/' + stat.total"></span>
+                                            </div>
+                                            <span class="font-bold text-emerald-400 font-mono text-xs sm:text-sm" x-text="stat.accuracy + '%'"></span>
+                                        </li>
+                                    </template>
+                                </ol>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
@@ -182,63 +620,59 @@
     </main>
 
     <script>
-        // Position weights for sorting CF down to GK
-        const POSITION_ORDER = { 
-            "CF": 1, "LWF": 2, "RWF": 3, "AMF": 4, "CMF": 5, 
-            "DMF": 6, "LB": 7, "CB": 8, "RB": 9, "GK": 10 
-        };
-
+        // REPLACE WITH YOUR ACTUAL FIREBASE APPS INITIALIZATION CONFIGURATION
         const firebaseConfig = {
-            apiKey: "AIzaSyCsz7eWfZChnjSJNiJCpP_RekLdJU5WFGw",
-            authDomain: "the-liga.firebaseapp.com",
-            databaseURL: "https://the-liga-default-rtdb.firebaseio.com",
-            projectId: "the-liga",
-            storageBucket: "the-liga.firebasestorage.app",
-            messagingSenderId: "399464608639",
-            appId: "1:399464608639:web:40a38cf60aebb30beaa04a",
-            measurementId: "G-YFNXDT2VLE"
+            databaseURL: "https://replace-with-your-realtime-database-db.firebaseio.com"
         };
-
-        firebase.initializeApp(firebaseConfig);
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
         const db = firebase.database();
         const auth = firebase.auth();
 
+        // App level states
         let players = [];
         let usersMap = {};
-        let fixturesList = [];
-        let userData = null;
+        let userData = {};
         let authMode = 'login';
-        let currentSeason = 1;
         let auctionDeadline = null;
         let clockInterval = null;
-        const INITIAL_BUDGET = 200; // Recalibrated base currency
+        let currentSeason = 1;
 
-        auth.onAuthStateChanged((user) => {
+        const INITIAL_BUDGET = 200;
+        const POSITION_ORDER = { 'CF': 1, 'SS': 2, 'LWF': 3, 'RWF': 4, 'AMF': 5, 'CMF': 6, 'LMF': 7, 'RMF': 8, 'DMF': 9, 'CB': 10, 'LB': 11, 'RB': 12, 'GK': 13 };
+
+        // Authentication State Listener
+        auth.onAuthStateChanged(user => {
             if (user) {
-                db.ref('users').on('value', (snapshot) => {
-                    usersMap = snapshot.val() || {};
-                    userData = usersMap[user.uid] || { name: "Anonymous Manager", role: "player", balance: INITIAL_BUDGET };
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-interface').classList.remove('hidden');
+                document.getElementById('mobile-nav').classList.remove('hidden');
+                db.ref(`users/${user.uid}`).on('value', snapshot => {
+                    userData = snapshot.val() || {};
                     userData.uid = user.uid;
-                    
-                    buildManagerSelectorDropdown();
-                    initializeLiveEnvironment();
+                    document.getElementById('nav-user').innerText = userData.name || user.email;
+                    document.getElementById('logout-btn').classList.remove('hidden');
+                    if (userData.role === 'admin') {
+                        document.getElementById('admin-controls-panel').classList.remove('hidden');
+                    } else {
+                        document.getElementById('admin-controls-panel').classList.add('hidden');
+                    }
+                    syncCoreData();
                 });
             } else {
                 showAuthPortal();
             }
         });
 
-        function buildManagerSelectorDropdown() {
-            const selector = document.getElementById('squad-focus-selector');
-            if(!selector) return;
-            let optionsHTML = '';
-            Object.keys(usersMap).forEach(uid => {
-                if(usersMap[uid].role !== 'admin') {
-                    const selectedAttr = uid === auth.currentUser.uid ? 'selected' : '';
-                    optionsHTML += `<option value="${uid}" ${selectedAttr}>${usersMap[uid].name}</option>`;
-                }
-            });
-            selector.innerHTML = optionsHTML;
+        function showAuthPortal() {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('app-interface').classList.add('hidden');
+            document.getElementById('mobile-nav').classList.add('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
+            document.getElementById('nav-user').innerText = 'Not Logged In';
         }
 
         function toggleAuthMode(mode) {
@@ -246,8 +680,8 @@
             const nameField = document.getElementById('signup-name-field');
             const submitBtn = document.getElementById('auth-submit-btn');
             
-            document.getElementById('toggle-login-btn').className = mode === 'login' ? 'text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1' : 'text-slate-400 font-bold text-sm uppercase tracking-wider pb-1';
-            document.getElementById('toggle-signup-btn').className = mode === 'signup' ? 'text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1' : 'text-slate-400 font-bold text-sm uppercase tracking-wider pb-1';
+            document.getElementById('toggle-login-btn').className = mode === 'login' ? 'text-cyan-400 font-bold text-xs md:text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1 cursor-pointer' : 'text-slate-400 font-bold text-xs md:text-sm uppercase tracking-wider pb-1 cursor-pointer';
+            document.getElementById('toggle-signup-btn').className = mode === 'signup' ? 'text-cyan-400 font-bold text-xs md:text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1 cursor-pointer' : 'text-slate-400 font-bold text-xs md:text-sm uppercase tracking-wider pb-1 cursor-pointer';
 
             if (mode === 'signup') {
                 nameField.classList.remove('hidden');
@@ -263,79 +697,68 @@
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value.trim();
 
-            if (!email || !password) return alert("Please fill in email and password.");
+            if (!email || !password) return alert("Please fill in authentication requirements.");
 
             if (authMode === 'signup') {
-                if (!name) return alert("Please choose a Custom Team Moniker.");
+                if(!name) return alert("Please specify a manager team identifier.");
                 auth.createUserWithEmailAndPassword(email, password)
-                    .then((cred) => {
-                        const role = email.toLowerCase() === "admin@theliga.com" ? "admin" : "player";
-                        // Instantly initialize wallet at 200M inside database registers
-                        return db.ref(`users/${cred.user.uid}`).set({ 
-                            name: name, 
-                            role: role,
-                            balance: INITIAL_BUDGET
+                    .then(cred => {
+                        return db.ref(`users/${cred.user.uid}`).set({
+                            name: name,
+                            email: email,
+                            balance: INITIAL_BUDGET,
+                            role: 'manager'
                         });
                     })
                     .catch(err => alert(err.message));
             } else {
-                auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
+                auth.signInWithEmailAndPassword(email, password)
+                    .catch(err => alert(err.message));
             }
         }
 
-        function logout() { auth.signOut().then(() => location.reload()); }
-
-        function showAuthPortal() {
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('app-interface').classList.add('hidden');
-            document.getElementById('nav-links').classList.add('hidden');
-            document.getElementById('logout-btn').classList.add('hidden');
+        function logout() {
+            auth.signOut().then(() => showAuthPortal());
         }
 
-        function initializeLiveEnvironment() {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('app-interface').classList.remove('hidden');
-            document.getElementById('nav-links').classList.remove('hidden');
-            document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('nav-user').innerText = `${userData.name}`;
+        function syncCoreData() {
+            db.ref('season').on('value', snap => {
+                currentSeason = snap.val() || 1;
+                document.getElementById('nav-season-badge').innerText = "Season " + currentSeason;
+            });
 
-            if (userData.role === 'admin') {
-                document.getElementById('admin-controls-panel').classList.remove('hidden');
-            }
+            db.ref('deadline').on('value', snap => {
+                auctionDeadline = snap.val() || 0;
+                runLiveDeadlineClock();
+            });
 
-            db.ref('systemSettings').on('value', (snapshot) => {
-                const settings = snapshot.val() || {};
-                currentSeason = settings.currentSeason || 1;
-                auctionDeadline = settings.auctionDeadline || new Date("July 13, 2026 14:00:00").getTime();
-                document.getElementById('nav-season-badge').innerText = `Season ${currentSeason}`;
-                
-                // Pre-populate the admin input box with the current database time
-                const deadlineInput = document.getElementById('admin-deadline-input');
-                if (deadlineInput && auctionDeadline) {
-                    const dateObj = new Date(auctionDeadline);
-                    const tzOffset = dateObj.getTimezoneOffset() * 60000;
-                    const localISOTime = (new Date(dateObj - tzOffset)).toISOString().slice(0, 16);
-                    deadlineInput.value = localISOTime;
+            db.ref('users').on('value', snap => {
+                usersMap = snap.val() || {};
+                buildManagerSelectorDropdown();
+                db.ref('players').on('value', pSnap => {
+                    const raw = pSnap.val() || {};
+                    players = Object.keys(raw).map(id => ({ id, ...raw[id] }));
+                    updateDashboardView();
+                    renderMarket();
+                    renderFixturesAndStandings();
+                });
+            });
+        }
+
+        function buildManagerSelectorDropdown() {
+            const selector = document.getElementById('squad-focus-selector');
+            if(!selector) return;
+            let optionsHTML = '';
+            Object.keys(usersMap).forEach(uid => {
+                if(usersMap[uid].role !== 'admin') {
+                    const selectedAttr = uid === auth.currentUser.uid ? 'selected' : '';
+                    optionsHTML += `<option value="${uid}" ${selectedAttr}>${usersMap[uid].name}</option>`;
                 }
-
-                startTimerEngine();
             });
-
-            db.ref('players').on('value', (snapshot) => {
-                const data = snapshot.val();
-                players = data ? Object.values(data) : [];
-                updateDashboardView();
-                renderMarket();
-            });
-
-            db.ref('fixtures').on('value', (snapshot) => {
-                const data = snapshot.val();
-                fixturesList = data ? Object.values(data) : [];
-                renderStandingsAndFixtures();
-            });
+            selector.innerHTML = optionsHTML;
         }
 
-        function startTimerEngine() {
+        function runLiveDeadlineClock() {
             if(clockInterval) clearInterval(clockInterval);
             clockInterval = setInterval(() => {
                 if (!auctionDeadline) return;
@@ -351,20 +774,11 @@
                     updateDashboardView();
                     return;
                 }
-                
-                // Fixed: Added logic to track full day blocks alongside hours, minutes, and seconds
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                
-                let timeString = "";
-                if (days > 0) {
-                    timeString += `${days}d `;
-                }
-                timeString += `${hours}h ${minutes}m ${seconds}s`;
-
-                banner.innerText = `⏱️ AUCTION STATUS: CLOSING IN ${timeString} ⏱️`;
+                banner.innerText = `⏱️ AUCTION STATUS: CLOSING IN ${hours}h ${minutes}m ${seconds}s ⏱️`;
                 banner.className = "bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all";
             }, 1000);
         }
@@ -372,90 +786,165 @@
         function handleCSV(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
-                const lines = e.target.result.split('\n').filter(l => l.trim() !== '');
-                let parsedPlayers = {};
-                const startIndex = lines[0].toLowerCase().includes('name') ? 1 : 0;
+                const text = e.target.result;
+                const lines = text.split('\n').filter(l => l.trim() !== '');
+                const headers = lines[0].split(',').map(h => h.trim());
+                const items = {};
 
-                for (let i = startIndex; i < lines.length; i++) {
-                    const cols = lines[i].split(',');
-                    if (cols.length >= 3) {
-                        const pId = "P" + String(i).padStart(3, '0');
-                        let rawPrice = parseInt(cols[2].replace(/[^0-9]/g, ''));
-                        
-                        // Converts full raw numeric values down to pristine Millions format
-                        if (rawPrice >= 100000) {
-                            rawPrice = Math.round(rawPrice / 1000000);
-                        }
-
-                        parsedPlayers[pId] = {
-                            id: pId,
-                            name: cols[0].trim(),
-                            position: cols[1].trim().toUpperCase(),
-                            basePrice: rawPrice,
-                            currentBid: rawPrice,
-                            highestBidderId: "",
-                            highestBidderName: "No Bids",
-                            status: "Available",
-                            contractYearsSelected: 1, 
-                            contractRemaining: 0
-                        };
-                    }
+                for(let i = 1; i < lines.length; i++) {
+                    const row = lines[i].split(',').map(c => c.trim());
+                    if (row.length < 4) continue;
+                    const pId = "P" + String(i).padStart(3, '0');
+                    items[pId] = {
+                        name: row[0],
+                        rating: parseInt(row[1]) || 80,
+                        position: row[2],
+                        overallValue: parseInt(row[3]) || 10,
+                        contractRemaining: 0,
+                        contractYearsSelected: 0,
+                        currentBid: parseInt(row[3]) || 10,
+                        highestBidderId: "",
+                        highestBidderName: "Unassigned",
+                        status: "Available"
+                    };
                 }
-                db.ref('players').set(parsedPlayers)
-                  .then(() => alert("Normalized 200M Economy Database Loaded!"))
-                  .catch(err => alert(err.message));
+                db.ref('players').set(items)
+                    .then(() => alert(`Success: Added ${Object.keys(items).length} transfer products database entries!`))
+                    .catch(err => alert(err.message));
             };
             reader.readAsText(file);
         }
 
-        // Live Real-Time Dashboard view updates
+        function setNewDeadline() {
+            const dateVal = document.getElementById('admin-deadline-input').value;
+            if(!dateVal) return alert("Select a date / hour pattern value first!");
+            const epoch = new Date(dateVal).getTime();
+            db.ref('deadline').set(epoch)
+                .then(() => alert("Target scheduling parameters updated successfully."));
+        }
+
+        function generateFixtures() {
+            const managers = Object.keys(usersMap).filter(uid => usersMap[uid].role !== 'admin');
+            if(managers.length < 2) return alert("Aborting Generation: Insufficient user nodes verified inside database structure.");
+            if(managers.length % 2 !== 0) {
+                managers.push("BYE_NODE");
+            }
+            const numTeams = managers.length;
+            const rounds = numTeams - 1;
+            const fixtures = {};
+            let matchCounter = 0;
+
+            for (let round = 0; round < rounds; round++) {
+                for (let i = 0; i < numTeams / 2; i++) {
+                    const home = managers[(round + i) % (numTeams - 1)];
+                    let away = managers[(numTeams - 1 - i + round) % (numTeams - 1)];
+                    if (i === 0) away = managers[numTeams - 1];
+
+                    if(home !== "BYE_NODE" && away !== "BYE_NODE") {
+                        matchCounter++;
+                        const id = "M" + String(matchCounter).padStart(3, '0');
+                        fixtures[id] = {
+                            id: id,
+                            homeId: home,
+                            homeName: usersMap[home].name,
+                            awayId: away,
+                            awayName: usersMap[away].name,
+                            homeScore: "-",
+                            awayScore: "-",
+                            status: "Scheduled",
+                            reportedBy: "",
+                            round: round + 1
+                        };
+                    }
+                }
+            }
+            db.ref('fixtures').set(fixtures)
+                .then(() => alert("Round-robin home schedules initialized successfully!"));
+        }
+
         function updateDashboardView() {
             const selector = document.getElementById('squad-focus-selector');
-            if(!selector || !selector.value) return;
-            
+            if(!selector || selector.value === '') return;
             const targetUid = selector.value;
-            const targetUser = usersMap[targetUid];
-            if (!targetUser) return;
-
+            const targetUser = usersMap[targetUid] || {};
+            
+            document.getElementById('dash-team-name').innerText = targetUser.name || "-";
+            
             const isPastDeadline = Date.now() > auctionDeadline;
 
-            // Compute roster items currently assigned to target
-            const targetSquad = players.filter(p => p.highestBidderId === targetUid && (p.contractRemaining > 0 || isPastDeadline));
+            // Render leading bids list
+            const leadingContainer = document.getElementById('leading-bids-list');
+            leadingContainer.innerHTML = '';
+            const leadingBids = players.filter(p => p.highestBidderId === targetUid && p.contractRemaining === 0);
             
-            // Sort tactical positions CF -> GK
-            targetSquad.sort((a, b) => {
-                const orderA = POSITION_ORDER[a.position] || 99;
-                const orderB = POSITION_ORDER[b.position] || 99;
-                return orderA - orderB;
-            });
+            if (leadingBids.length === 0) {
+                leadingContainer.innerHTML = `<tr><td colspan="3" class="text-center text-xs text-slate-500 py-6">No leading active bids.</td></tr>`;
+            } else {
+                leadingBids.forEach(p => {
+                    leadingContainer.innerHTML += `
+                    <tr class="hover:bg-slate-900/40 text-[11px] border-b border-slate-800/40">
+                        <td class="py-2.5 font-semibold text-white truncate max-w-[120px]">${p.name}</td>
+                        <td class="py-2.5 text-center"><span class="bg-slate-800 text-slate-300 text-[9px] px-1.5 py-0.5 rounded font-bold font-mono">${p.position}</span></td>
+                        <td class="py-2.5 text-right text-emerald-400 font-bold font-mono">${p.currentBid}M</td>
+                    </tr>`;
+                });
+            }
 
-            // Dynamic live bidding commitment calculations
+            // Render active squad roster (owned or leading post-deadline)
+            const squadContainer = document.getElementById('squad-list');
+            squadContainer.innerHTML = '';
+            const targetSquad = players.filter(p => p.highestBidderId === targetUid && (p.contractRemaining > 0 || isPastDeadline));
+            targetSquad.sort((a, b) => (POSITION_ORDER[a.position] || 99) - (POSITION_ORDER[b.position] || 99));
+
+            if (targetSquad.length === 0) {
+                squadContainer.innerHTML = `<tr><td colspan="4" class="text-center text-xs text-slate-500 py-12">Roster is empty. Complete bids or buy contracts.</td></tr>`;
+            } else {
+                targetSquad.forEach(p => {
+                    const labelYear = p.contractRemaining > 0 ? `${p.contractRemaining} Yr` : `Pending Sign`;
+                    squadContainer.innerHTML += `
+                    <tr class="hover:bg-slate-900/40 text-xs md:text-sm border-b border-slate-800/40">
+                        <td class="py-3">
+                            <div class="font-bold text-white">${p.name}</div>
+                            <div class="text-[9px] text-slate-500 font-mono">Rating: OVR ${p.rating}</div>
+                        </td>
+                        <td class="py-3 text-center"><span class="bg-slate-800 text-slate-200 text-[10px] px-2 py-0.5 rounded font-bold font-mono">${p.position}</span></td>
+                        <td class="py-3 text-center text-xs font-semibold text-slate-300 font-mono">${labelYear}</td>
+                        <td class="py-3 text-right font-black text-emerald-400 font-mono">${p.currentBid}M</td>
+                    </tr>`;
+                });
+            }
+
+            // Live budgeting calculations
             const myCurrentBalance = targetUser.balance !== undefined ? targetUser.balance : INITIAL_BUDGET;
             const activeBidsTotal = players.filter(p => p.highestBidderId === targetUid && p.contractRemaining === 0).reduce((sum, p) => sum + p.currentBid, 0);
-            
-            // Available cash equals overall database balance minus currently active auction bids
             const liveAvailable = myCurrentBalance - activeBidsTotal;
 
-            document.getElementById('dash-team-name').innerText = targetUser.name;
-            document.getElementById('dash-balance').innerText = `${liveAvailable}M`;
-            document.getElementById('dash-pending-bids').innerText = `Locked/Active bids this season: ${activeBidsTotal}M (Base cash: ${myCurrentBalance}M)`;
+            if (targetUid === auth.currentUser.uid) {
+                document.getElementById('dash-balance').innerText = `${liveAvailable}M`;
+                document.getElementById('dash-balance').className = liveAvailable < 0 ? "text-2xl md:text-3xl font-bold text-rose-500 mt-1" : "text-2xl md:text-3xl font-bold text-emerald-400 mt-1";
+                document.getElementById('dash-pending-bids').innerText = `Active pending bids commitment: ${activeBidsTotal}M / Personal Base Balance: ${myCurrentBalance}M`;
+            }
 
-            const container = document.getElementById('squad-list');
-            container.innerHTML = targetSquad.length === 0 ? `<tr><td colspan="4" class="text-center text-xs text-slate-500 py-6">No roster parameters acquired.</td></tr>` : '';
+            // Render Global top bids ticker
+            const globalContainer = document.getElementById('global-bids-list');
+            globalContainer.innerHTML = '';
+            const activeTopBids = players.filter(p => p.highestBidderId !== "" && p.contractRemaining === 0);
+            activeTopBids.sort((a,b) => b.currentBid - a.currentBid);
 
-            targetSquad.forEach(p => {
-                const displayRemaining = p.contractRemaining > 0 ? p.contractRemaining : p.contractYearsSelected;
-                container.innerHTML += `
-                    <tr class="hover:bg-slate-900/40 text-xs border-b border-slate-800/40">
-                        <td class="py-3 font-semibold text-white">${p.name}</td>
-                        <td class="py-3 text-center"><span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold font-mono">${p.position}</span></td>
-                        <td class="py-3 text-center text-cyan-400 font-mono">${displayRemaining} ${displayRemaining === 1 ? 'Season' : 'Seasons'}</td>
-                        <td class="py-3 text-right text-emerald-400 font-bold font-mono">${p.currentBid}M</td>
+            if(activeTopBids.length === 0) {
+                globalContainer.innerHTML = `<tr><td colspan="3" class="text-center text-xs text-slate-500 py-8">No live auction placements found.</td></tr>`;
+            } else {
+                activeTopBids.slice(0, 15).forEach(p => {
+                    globalContainer.innerHTML += `
+                    <tr class="hover:bg-slate-900/40 text-[11px] border-b border-slate-800/40">
+                        <td class="py-2.5 font-semibold text-white truncate max-w-[100px]">${p.name}</td>
+                        <td class="py-2.5 text-right text-rose-400 font-bold font-mono">${p.currentBid}M</td>
+                        <td class="py-2.5 text-right text-slate-300 font-mono truncate max-w-[80px]">${p.highestBidderName}</td>
                     </tr>`;
-            });
+                });
+            }
         }
 
         function renderMarket() {
@@ -476,7 +965,7 @@
                 const isLockedByContract = player.contractRemaining > 0;
                 const isSoldThisSeason = !isLockedByContract && (player.status === "Sold" || (isPastDeadline && player.highestBidderId !== ""));
                 const isUnsoldExpired = isPastDeadline && player.highestBidderId === "";
-                
+
                 let cardStyle = "border-slate-800 bg-slate-950";
                 let statusLabel = player.status;
                 let disabledAttr = (isSoldThisSeason || isUnsoldExpired || isLockedByContract) ? 'disabled' : '';
@@ -488,56 +977,64 @@
                     cardStyle = "border-slate-950 bg-slate-950/40 opacity-40";
                     statusLabel = "Expired Unsold";
                 } else if (isSoldThisSeason) {
-                    cardStyle = "border-red-900/30 bg-slate-950/60 opacity-70";
-                    statusLabel = "ACQUIRED";
-                } else if (player.highestBidderId === userData.uid) {
-                    cardStyle = "border-emerald-500/40 bg-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.05)]";
+                    cardStyle = "border-red-900/40 bg-slate-950/30 opacity-70";
+                    statusLabel = `SOLD (${player.highestBidderName})`;
+                } else if (player.highestBidderId !== "") {
+                    cardStyle = "border-cyan-500/40 bg-slate-950 shadow-md shadow-cyan-500/5 animate-[pulse_3s_infinite]";
+                    statusLabel = `Top Bidder: ${player.highestBidderName}`;
+                }
+
+                let yearsOptions = '';
+                if (!isSoldThisSeason && !isUnsoldExpired && !isLockedByContract && player.highestBidderId === auth.currentUser.uid) {
+                    yearsOptions = `
+                    <div class="mt-3 bg-slate-900 p-2 rounded border border-slate-800 flex justify-between items-center">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase">Contract Period</label>
+                        <select onchange="updateContractYears('${player.id}', this.value)" class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-white focus:outline-none focus:border-cyan-500">
+                            <option value="0" ${player.contractYearsSelected === 0 ? 'selected' : ''}>None Selected</option>
+                            <option value="1" ${player.contractYearsSelected === 1 ? 'selected' : ''}>1 Year (100% value)</option>
+                            <option value="2" ${player.contractYearsSelected === 2 ? 'selected' : ''}>2 Years (120% value)</option>
+                            <option value="3" ${player.contractYearsSelected === 3 ? 'selected' : ''}>3 Years (140% value)</option>
+                        </select>
+                    </div>`;
                 }
 
                 grid.innerHTML += `
-                    <div class="border p-5 rounded-xl flex flex-col justify-between ${cardStyle}">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded font-bold">${player.position}</span>
-                                <span class="text-xs ${isSoldThisSeason ? 'text-red-400 font-bold' : 'text-cyan-400'} font-medium uppercase">${statusLabel}</span>
+                <div class="border rounded-xl p-5 flex flex-col justify-between transition-all duration-300 ${cardStyle}">
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-white text-base md:text-lg">${player.name}</h3>
+                                <div class="text-xs text-slate-500 font-mono font-semibold">OVR: ${player.rating} | Base: ${player.overallValue}M</div>
                             </div>
-                            <h3 class="gaming-font text-base font-bold text-white mb-4">${player.name}</h3>
-                            
-                            <div class="space-y-1.5 text-xs bg-slate-900/60 p-3 rounded border border-slate-800 mb-4">
-                                <div class="flex justify-between"><span class="text-slate-500">Base Cost:</span> <span class="text-slate-300 font-mono">${player.basePrice}M</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500">Current Value:</span> <span class="text-cyan-400 font-bold font-mono">${player.currentBid}M</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500">Top Bidder:</span> <span class="text-slate-200 font-semibold">${player.highestBidderName}</span></div>
-                            </div>
-
-                            ${(!isSoldThisSeason && !isUnsoldExpired && !isLockedByContract) ? `
-                                <div class="mb-3">
-                                    <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Contract Parameters</label>
-                                    <select id="contract-select-${player.id}" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-1.5 text-slate-300 focus:outline-none">
-                                        <option value="1">1 Season lease</option>
-                                        <option value="2">2 Seasons lease</option>
-                                        <option value="3">3 Seasons lease</option>
-                                    </select>
-                                </div>
-                            ` : ''}
+                            <span class="bg-slate-800 text-slate-200 text-xs px-2 py-1 rounded font-black font-mono tracking-wider">${player.position}</span>
                         </div>
-
-                        <div class="space-y-2 mt-2 pt-3 border-t border-slate-900/60">
-                            <div class="flex gap-2">
-                                <input type="number" id="bid-input-${player.id}" placeholder="Custom Millions" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white text-center font-mono focus:outline-none" ${disabledAttr}>
-                                <button onclick="placeBid('${player.id}', null)" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-1.5 rounded transition uppercase border border-slate-700" ${disabledAttr}>Custom</button>
+                        <div class="mt-4 flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-800">
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Current Bid Value</p>
+                                <p class="text-xl font-black text-emerald-400 font-mono">${player.currentBid}M</p>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="placeBid('${player.id}', 1)" class="w-1/2 bg-blue-950/60 hover:bg-blue-900 text-blue-400 font-bold text-[11px] py-2 rounded border border-blue-900/50 transition font-mono" ${disabledAttr}>+1M BID</button>
-                                <button onclick="placeBid('${player.id}', 2)" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold text-[11px] py-2 rounded transition font-mono uppercase shadow" ${disabledAttr}>+2M BID</button>
-                            </div>
+                            <span class="text-[9px] uppercase font-black px-2 py-1 rounded tracking-wider bg-slate-800 text-cyan-400 border border-slate-700" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${statusLabel}</span>
                         </div>
-                    </div>`;
+                        ${yearsOptions}
+                    </div>
+
+                    <div class="mt-5 space-y-3">
+                        <div class="flex gap-2">
+                            <input type="number" id="bid-input-${player.id}" placeholder="${player.currentBid + 1}" class="w-1/2 bg-slate-900 border border-slate-700 rounded p-2 text-sm text-white focus:outline-none focus:border-cyan-500 font-bold font-mono">
+                            <button onclick="placeBid('${player.id}', null)" class="w-1/2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-2 rounded text-xs tracking-wider uppercase shadow cursor-pointer font-sans" ${disabledAttr}>PROPOSE</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="placeBid('${player.id}', 1)" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1.5 rounded text-[10px] font-mono uppercase shadow cursor-pointer" ${disabledAttr}>+1M BID</button>
+                            <button onclick="placeBid('${player.id}', 2)" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1.5 rounded text-[10px] font-mono uppercase shadow cursor-pointer" ${disabledAttr}>+2M BID</button>
+                            <button onclick="placeBid('${player.id}', 5)" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1.5 rounded text-[10px] font-mono uppercase shadow cursor-pointer" ${disabledAttr}>+5M BID</button>
+                        </div>
+                    </div>
+                </div>`;
             });
         }
 
         function placeBid(pId, quickIncrement) {
             if (Date.now() > auctionDeadline) return alert("Action Terminated: Bidding schedule window is closed!");
-
             const player = players.find(p => p.id === pId);
             let targetBid = 0;
 
@@ -545,207 +1042,131 @@
                 targetBid = player.currentBid + quickIncrement;
             } else {
                 const inputVal = parseInt(document.getElementById(`bid-input-${pId}`).value);
-                if (!inputVal) return alert("Specify absolute Millions target numeric parameter values.");
+                if (isNaN(inputVal) || inputVal < 1) {
+                    return alert("Invalid Entry: Custom bids must be a valid number and restrict to an absolute minimum value of 1M.");
+                }
+                if (inputVal <= player.currentBid) {
+                    return alert(`Offer Denied: Custom absolute bid must be higher than the current top bid of ${player.currentBid}M.`);
+                }
                 targetBid = inputVal;
             }
 
-            if (targetBid <= player.currentBid) {
-                return alert(`Offer Denied: Must scale value past ${player.currentBid}M`);
-            }
-
-            // Real-Time Bankruptcy Protection Check
             const myBalance = userData.balance !== undefined ? userData.balance : INITIAL_BUDGET;
             const currentActiveBidsTotal = players
                 .filter(p => p.highestBidderId === userData.uid && p.contractRemaining === 0 && p.id !== pId)
                 .reduce((sum, p) => sum + p.currentBid, 0);
 
             if (currentActiveBidsTotal + targetBid > myBalance) {
-                return alert(`Insufficient Funds: This bid (${targetBid}M) combined with your other active bids (${currentActiveBidsTotal}M) exceeds your current account balance of ${myBalance}M!`);
+                return alert(`PROPOSAL DENIED: Insufficient remaining balance portfolio cash reserves (Balance: ${myBalance}M | Combined Outstanding Obligations: ${currentActiveBidsTotal + targetBid}M).`);
             }
-
-            const contractDropdown = document.getElementById(`contract-select-${pId}`);
-            const chosenYears = contractDropdown ? parseInt(contractDropdown.value) : 1;
 
             db.ref(`players/${pId}`).update({
                 currentBid: targetBid,
                 highestBidderId: userData.uid,
                 highestBidderName: userData.name,
-                status: "Active Bidding",
-                contractYearsSelected: chosenYears
+                contractYearsSelected: 1 // Default contract to 1 year
             });
         }
 
-        // Custom timer update utility function
-        function setNewDeadline() {
-            const inputVal = document.getElementById('admin-deadline-input').value;
-            if(!inputVal) return alert("Please select a valid date and time.");
-            
-            // Convert the local input string to a millisecond timestamp
-            const timestamp = new Date(inputVal).getTime();
-            if(isNaN(timestamp)) return alert("Invalid date parameters detected.");
-            
-            // Save dynamically to your Firebase real-time database
-            db.ref('systemSettings').update({
-                auctionDeadline: timestamp
-            }).then(() => {
-                alert("⏰ Auction schedule updated! All managers will see the new live countdown.");
-            }).catch(err => alert("Error updating schedule: " + err.message));
+        function updateContractYears(pId, years) {
+            db.ref(`players/${pId}`).update({ contractYearsSelected: parseInt(years) });
         }
 
-        // Home/Away Round-Robin Generator Engine
-        function generateFixtures() {
-            const managers = Object.keys(usersMap).filter(uid => usersMap[uid].role !== 'admin');
-            if(managers.length < 2) return alert("Aborting Generation: Insufficient user nodes verified inside database structure.");
+        function renderFixturesAndStandings() {
+            db.ref('fixtures').once('value', snap => {
+                const rawFixtures = snap.val() || {};
+                const fixturesList = Object.keys(rawFixtures).map(id => rawFixtures[id]);
+                const fixturesContainer = document.getElementById('fixtures-container');
+                const tableBody = document.getElementById('league-table-body');
 
-            if(managers.length % 2 !== 0) {
-                managers.push("BYE_NODE"); 
-            }
-
-            const numTeams = managers.length;
-            const rounds = numTeams - 1;
-            const fixtures = {};
-            let matchCounter = 0;
-
-            // Generate Home Matrix
-            for (let round = 0; round < rounds; round++) {
-                for (let i = 0; i < numTeams / 2; i++) {
-                    const home = managers[(round + i) % (numTeams - 1)];
-                    let away = managers[(numTeams - 1 - i + round) % (numTeams - 1)];
-                    if (i === 0) away = managers[numTeams - 1];
-
-                    if(home !== "BYE_NODE" && away !== "BYE_NODE") {
-                        matchCounter++;
-                        const id = "M" + String(matchCounter).padStart(3, '0');
-                        fixtures[id] = {
-                            id: id, homeId: home, homeName: usersMap[home].name,
-                            awayId: away, awayName: usersMap[away].name,
-                            homeScore: "-", awayScore: "-", status: "Scheduled",
-                            reportedBy: "", round: round + 1
-                        };
+                const tableData = {};
+                Object.keys(usersMap).forEach(uid => {
+                    if (usersMap[uid].role !== 'admin') {
+                        tableData[uid] = { name: usersMap[uid].name, played: 0, gd: 0, pts: 0 };
                     }
-                }
-            }
+                });
 
-            // Generate Away Matrix
-            for (let round = 0; round < rounds; round++) {
-                for (let i = 0; i < numTeams / 2; i++) {
-                    let home = managers[(round + i) % (numTeams - 1)];
-                    const away = managers[(numTeams - 1 - i + round) % (numTeams - 1)];
-                    if (i === 0) home = managers[numTeams - 1];
-
-                    if(home !== "BYE_NODE" && away !== "BYE_NODE") {
-                        matchCounter++;
-                        const id = "M" + String(matchCounter).padStart(3, '0');
-                        fixtures[id] = {
-                            id: id, homeId: away, homeName: usersMap[away].name,
-                            awayId: home, awayName: usersMap[home].name,
-                            homeScore: "-", awayScore: "-", status: "Scheduled",
-                            reportedBy: "", round: round + rounds + 1
-                        };
-                    }
-                }
-            }
-
-            db.ref('fixtures').set(fixtures).then(() => alert("Balanced Home/Away Fixture Matrix Compiled!"));
-        }
-
-        // Interactive Standings Calculations and Verification Panel
-        function renderStandingsAndFixtures() {
-            const tableBody = document.getElementById('league-table-body');
-            const fixturesContainer = document.getElementById('fixtures-container');
-            
-            const tableData = {};
-            Object.keys(usersMap).forEach(uid => {
-                if(usersMap[uid].role !== 'admin') {
-                    tableData[uid] = { name: usersMap[uid].name, played: 0, gd: 0, pts: 0 };
-                }
-            });
-
-            fixturesList.forEach(m => {
-                if(m.status === "Approved") {
-                    const hScore = parseInt(m.homeScore);
-                    const aScore = parseInt(m.awayScore);
-                    if(tableData[m.homeId] && tableData[m.awayId]) {
-                        tableData[m.homeId].played++;
-                        tableData[m.awayId].played++;
-                        tableData[m.homeId].gd += (hScore - aScore);
-                        tableData[m.awayId].gd += (aScore - hScore);
-
-                        if(hScore > aScore) tableData[m.homeId].pts += 3;
-                        else if(aScore > hScore) tableData[m.awayId].pts += 3;
-                        else {
-                            tableData[m.homeId].pts += 1;
-                            tableData[m.awayId].pts += 1;
+                fixturesList.forEach(m => {
+                    if (m.status === 'Approved') {
+                        const hScore = parseInt(m.homeScore);
+                        const aScore = parseInt(m.awayScore);
+                        if (tableData[m.homeId] && tableData[m.awayId]) {
+                            tableData[m.homeId].played++;
+                            tableData[m.awayId].played++;
+                            tableData[m.homeId].gd += (hScore - aScore);
+                            tableData[m.awayId].gd += (aScore - hScore);
+                            if (hScore > aScore) {
+                                tableData[m.homeId].pts += 3;
+                            } else if (hScore < aScore) {
+                                tableData[m.awayId].pts += 3;
+                            } else {
+                                tableData[m.homeId].pts += 1;
+                                tableData[m.awayId].pts += 1;
+                            }
                         }
                     }
-                }
-            });
+                });
 
-            const sortedStandings = Object.values(tableData).sort((a,b) => b.pts - a.pts || b.gd - a.gd);
-            tableBody.innerHTML = '';
-            sortedStandings.forEach(row => {
-                tableBody.innerHTML += `
+                const sortedStandings = Object.values(tableData).sort((a,b) => b.pts - a.pts || b.gd - a.gd);
+                tableBody.innerHTML = '';
+                sortedStandings.forEach(row => {
+                    tableBody.innerHTML += `
                     <tr class="border-b border-slate-800/40 hover:bg-slate-900/20">
                         <td class="py-2.5 font-sans font-semibold text-slate-200">${row.name}</td>
                         <td class="text-center text-slate-400">${row.played}</td>
                         <td class="text-center ${row.gd > 0 ? 'text-emerald-400' : row.gd < 0 ? 'text-rose-400' : 'text-slate-500'}">${row.gd > 0 ? '+' : ''}${row.gd}</td>
                         <td class="text-right text-cyan-400 font-bold">${row.pts}</td>
                     </tr>`;
-            });
+                });
 
-            fixturesContainer.innerHTML = fixturesList.length === 0 ? `<div class="text-center text-xs text-slate-500 py-12 border border-dashed border-slate-800 rounded">Fixtures schedule matrix uninitialized.</div>` : '';
-            
-            let currentRenderedRound = 0;
-
-            fixturesList.sort((a,b) => a.round - b.round).forEach(match => {
-                if(match.round !== currentRenderedRound) {
-                    currentRenderedRound = match.round;
-                    fixturesContainer.innerHTML += `<div class="text-slate-500 text-[10px] tracking-widest font-bold uppercase pt-4 pb-1 border-b border-slate-800/60">ROUND ${currentRenderedRound}</div>`;
-                }
-
-                const isParticipant = userData.uid === match.homeId || userData.uid === match.awayId;
-                const wasReporter = match.reportedBy === userData.uid;
+                fixturesContainer.innerHTML = fixturesList.length === 0 ? `<div class="text-center text-xs text-slate-500 py-12 border border-dashed border-slate-800 rounded">Fixtures schedule matrix uninitialized.</div>` : '';
+                let currentRenderedRound = 0;
                 
-                let badgeStyle = "bg-slate-800 text-slate-400";
-                if(match.status === "Pending") badgeStyle = "bg-amber-950 text-amber-400 animate-pulse border border-amber-800/30";
-                if(match.status === "Approved") badgeStyle = "bg-emerald-950 text-emerald-400 border border-emerald-900/40";
-
-                let interfaceHTML = '';
-                if(match.status === "Scheduled" && isParticipant) {
-                    interfaceHTML = `
-                        <div class="flex items-center gap-2 mt-2 pt-2 border-t border-slate-900">
-                            <input type="number" placeholder="H" id="score-h-${match.id}" class="w-10 bg-slate-900 border border-slate-700 text-xs p-1 text-center font-bold rounded text-white focus:outline-none">
-                            <span class="text-slate-600 font-bold">:</span>
-                            <input type="number" placeholder="A" id="score-a-${match.id}" class="w-10 bg-slate-900 border border-slate-700 text-xs p-1 text-center font-bold rounded text-white focus:outline-none">
-                            <button onclick="reportMatchScore('${match.id}')" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 text-[10px] font-bold px-3 py-1 rounded tracking-wider uppercase transition ml-auto">Submit</button>
-                        </div>`;
-                } else if(match.status === "Pending") {
-                    if(isParticipant && !wasReporter) {
-                        interfaceHTML = `
-                            <div class="flex gap-2 mt-2 pt-2 border-t border-slate-900 items-center justify-between">
-                                <span class="text-[10px] text-amber-400/80 italic">Confirm opponent data?</span>
-                                <div class="flex gap-1">
-                                    <button onclick="disputeMatchScore('${match.id}')" class="bg-slate-800 hover:bg-slate-700 text-rose-400 text-[10px] font-semibold px-2 py-0.5 rounded border border-slate-700 transition">Reject</button>
-                                    <button onclick="approveMatchScore('${match.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-[10px] font-bold px-3 py-0.5 rounded transition uppercase">Approve</button>
-                                </div>
-                            </div>`;
-                    } else {
-                        interfaceHTML = `<div class="text-[10px] text-slate-500 italic mt-1 text-right">Awaiting opponent peer validation...</div>`;
+                fixturesList.sort((a,b) => a.round - b.round).forEach(match => {
+                    if(match.round !== currentRenderedRound) {
+                        currentRenderedRound = match.round;
+                        fixturesContainer.innerHTML += `<div class="text-xs uppercase tracking-widest text-slate-500 font-bold mt-4 mb-2 border-b border-slate-800 pb-1">Round ${currentRenderedRound}</div>`;
                     }
-                }
 
-                fixturesContainer.innerHTML += `
-                    <div class="bg-slate-950/60 border border-slate-800/60 p-3.5 rounded-xl transition flex flex-col justify-between">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-4 w-5/6">
-                                <div class="w-2/5 text-xs text-right truncate font-medium ${match.status === 'Approved' && parseInt(match.homeScore) > parseInt(match.awayScore) ? 'text-cyan-400 font-bold' : 'text-slate-300'}">${match.homeName}</div>
-                                <div class="bg-slate-900 px-3 py-1 rounded font-mono font-bold text-xs border border-slate-800 min-w-[50px] text-center text-white">${match.homeScore} : ${match.awayScore}</div>
-                                <div class="w-2/5 text-xs text-left truncate font-medium ${match.status === 'Approved' && parseInt(match.awayScore) > parseInt(match.homeScore) ? 'text-cyan-400 font-bold' : 'text-slate-300'}">${match.awayName}</div>
-                            </div>
-                            <span class="text-[9px] font-bold font-mono px-2 py-0.5 rounded uppercase ${badgeStyle}">${match.status}</span>
+                    const isHome = match.homeId === userData.uid;
+                    const isAway = match.awayId === userData.uid;
+                    let interfaceHTML = '';
+
+                    if (match.status === 'Scheduled' && (isHome || isAway)) {
+                        interfaceHTML = `
+                        <div class="mt-3 flex gap-2 justify-end items-center">
+                            <input type="number" id="score-h-${match.id}" placeholder="H" class="w-12 bg-slate-900 border border-slate-700 text-xs rounded p-1 text-center font-bold text-white">
+                            <span class="text-xs text-slate-500">:</span>
+                            <input type="number" id="score-a-${match.id}" placeholder="A" class="w-12 bg-slate-900 border border-slate-700 text-xs rounded p-1 text-center font-bold text-white">
+                            <button onclick="reportMatchScore('${match.id}')" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold px-3 py-1 rounded text-[10px] uppercase cursor-pointer">Report</button>
+                        </div>`;
+                    } else if (match.status === 'Pending' && match.reportedBy !== userData.uid && (isHome || isAway)) {
+                        interfaceHTML = `
+                        <div class="mt-3 flex gap-2 justify-end">
+                            <button onclick="approveMatchScore('${match.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-3 py-1 rounded text-[10px] uppercase cursor-pointer">Verify Match</button>
+                            <button onclick="disputeMatchScore('${match.id}')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1 rounded text-[10px] uppercase cursor-pointer">Dispute</button>
+                        </div>`;
+                    } else if (userData.role === 'admin' && match.status === 'Pending') {
+                        interfaceHTML = `
+                        <div class="mt-3 flex gap-2 justify-end">
+                            <button onclick="approveMatchScore('${match.id}')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 rounded text-[10px] uppercase cursor-pointer">Admin Force Verify</button>
+                        </div>`;
+                    }
+
+                    const badgeStyle = match.status === 'Approved' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20' : match.status === 'Pending' ? 'bg-amber-950/40 text-amber-400 border border-amber-500/20 animate-pulse' : 'bg-slate-900 text-slate-400';
+                    fixturesContainer.innerHTML += `
+                    <div class="bg-slate-900/40 border border-slate-800/80 p-4 rounded-lg flex flex-col justify-between items-stretch">
+                        <div class="flex justify-between items-center gap-4">
+                            <div class="w-2/5 text-xs text-right truncate font-medium ${match.status === 'Approved' && parseInt(match.homeScore) > parseInt(match.awayScore) ? 'text-cyan-400 font-bold' : 'text-slate-300'}">${match.homeName}</div>
+                            <div class="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 min-w-[50px] text-center text-white">${match.homeScore} : ${match.awayScore}</div>
+                            <div class="w-2/5 text-xs text-left truncate font-medium ${match.status === 'Approved' && parseInt(match.awayScore) > parseInt(match.homeScore) ? 'text-cyan-400 font-bold' : 'text-slate-300'}">${match.awayName}</div>
                         </div>
-                        ${interfaceHTML}
+                        <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-900">
+                            <span class="text-[9px] font-bold font-mono px-2 py-0.5 rounded uppercase ${badgeStyle}">${match.status}</span>
+                            ${interfaceHTML}
+                        </div>
                     </div>`;
+                });
             });
         }
 
@@ -753,7 +1174,6 @@
             const hInput = document.getElementById(`score-h-${mId}`).value;
             const aInput = document.getElementById(`score-a-${mId}`).value;
             if(hInput === '' || aInput === '') return alert("Please specify integer numeric inputs for both teams.");
-
             db.ref(`fixtures/${mId}`).update({
                 homeScore: parseInt(hInput),
                 awayScore: parseInt(aInput),
@@ -767,125 +1187,240 @@
         }
 
         function disputeMatchScore(mId) {
-            if(!confirm("Reset match entry data back to empty status parameters?")) return;
+            if(!confirm("Reset match entry and allow a re-submission score report?")) return;
             db.ref(`fixtures/${mId}`).update({
-                homeScore: "-", awayScore: "-",
-                status: "Scheduled", reportedBy: ""
+                homeScore: "-",
+                awayScore: "-",
+                status: "Scheduled",
+                reportedBy: ""
             });
         }
 
-        // Real-Time Payouts & Contract Expiry State transitions
         function advanceSeason() {
-            if (!confirm("⚠️ Transition tournament ecosystem state to next Season iteration structure safely? This calculates winners, handles the 200M base payout, updates placement rewards, and clears fixtures.")) return;
-
-            // 1. Determine Standings to establish Champion & Runner-up
-            const tableData = {};
-            Object.keys(usersMap).forEach(uid => {
-                if(usersMap[uid].role !== 'admin') {
-                    tableData[uid] = { uid: uid, played: 0, gd: 0, pts: 0 };
-                }
-            });
-
-            fixturesList.forEach(m => {
-                if(m.status === "Approved") {
-                    const hScore = parseInt(m.homeScore);
-                    const aScore = parseInt(m.awayScore);
-                    if(tableData[m.homeId] && tableData[m.awayId]) {
-                        tableData[m.homeId].played++;
-                        tableData[m.awayId].played++;
-                        tableData[m.homeId].gd += (hScore - aScore);
-                        tableData[m.awayId].gd += (aScore - hScore);
-
-                        if(hScore > aScore) tableData[m.homeId].pts += 3;
-                        else if(aScore > hScore) tableData[m.awayId].pts += 3;
-                        else {
-                            tableData[m.homeId].pts += 1;
-                            tableData[m.awayId].pts += 1;
-                        }
-                    }
-                }
-            });
-
-            const sortedStandings = Object.values(tableData).sort((a,b) => b.pts - a.pts || b.gd - a.gd);
-            const championId = sortedStandings[0] ? sortedStandings[0].uid : null;
-            const runnerUpId = sortedStandings[1] ? sortedStandings[1].uid : null;
+            if (!confirm(`WARNING: Advancing seasons will write current pending auctions, apply active player contract decays, and distribute manager salary bonuses. Confirm proceed?`)) return;
 
             const updatePayload = {};
+            const isPastDeadline = Date.now() > auctionDeadline;
 
-            // 2. Process Manager Wallet Balances
-            Object.keys(usersMap).forEach(uid => {
-                if(usersMap[uid].role === 'admin') return;
+            // 1. Calculate and distribute placements prize payouts
+            let championId = null;
+            let runnerUpId = null;
 
-                const currentBalance = usersMap[uid].balance !== undefined ? usersMap[uid].balance : INITIAL_BUDGET;
-                
-                // Calculate actual money spent this season (bids won where contracts haven't decremented yet)
-                const spentThisSeason = players
-                    .filter(p => p.highestBidderId === uid && p.contractRemaining === 0)
-                    .reduce((sum, p) => sum + p.currentBid, 0);
-                
-                // Deduct expenditures
-                let finalBalance = currentBalance - spentThisSeason;
-
-                // Add base +200M seasonal payout
-                finalBalance += 200;
-
-                // Apply placement rewards (+40M for Champ, +20M for Runner-up)
-                let bonusLabel = "";
-                if (championId && uid === championId) {
-                    finalBalance += 40;
-                    bonusLabel = " (Champion +40M)";
-                } else if (runnerUpId && uid === runnerUpId) {
-                    finalBalance += 20;
-                    bonusLabel = " (Runner-up +20M)";
-                }
-
-                updatePayload[`users/${uid}/balance`] = finalBalance;
-            });
-
-            // 3. Process Player Contracts
+            // 2. Process player statuses and contracts
             players.forEach(p => {
                 let currentRemaining = p.contractRemaining;
-                
                 if (p.highestBidderId !== "" && currentRemaining === 0) {
                     currentRemaining = p.contractYearsSelected;
                 }
-
                 if (currentRemaining > 0) {
-                    const nextRemaining = currentRemaining - 1;
-                    if (nextRemaining > 0) {
-                        updatePayload[`players/${p.id}/contractRemaining`] = nextRemaining;
-                        updatePayload[`players/${p.id}/status`] = "Locked";
-                    } else {
-                        // Release player back onto the transfer pool
-                        updatePayload[`players/${p.id}/contractRemaining`] = 0;
+                    const decay = currentRemaining - 1;
+                    updatePayload[`players/${p.id}/contractRemaining`] = decay;
+                    updatePayload[`players/${p.id}/status`] = decay === 0 ? "Available" : `Locked (${p.highestBidderName})`;
+                    if (decay === 0) {
                         updatePayload[`players/${p.id}/highestBidderId`] = "";
-                        updatePayload[`players/${p.id}/highestBidderName`] = "No Bids";
-                        updatePayload[`players/${p.id}/status`] = "Available";
-                        updatePayload[`players/${p.id}/currentBid`] = p.basePrice; 
+                        updatePayload[`players/${p.id}/highestBidderName`] = "Unassigned";
+                        updatePayload[`players/${p.id}/currentBid`] = p.overallValue;
                     }
                 }
             });
 
-            // 4. Update core server metadata states
-            const nextDeadline = Date.now() + (24 * 60 * 60 * 1000); // Sets default 24-hour draft window
-            updatePayload['systemSettings/currentSeason'] = currentSeason + 1;
-            updatePayload['systemSettings/auctionDeadline'] = nextDeadline;
-            updatePayload['fixtures'] = null; // Purges old standings
+            // 3. Overall basic seasonal balance bonuses payouts
+            Object.keys(usersMap).forEach(uid => {
+                if(usersMap[uid].role !== 'admin') {
+                    let finalBalance = (usersMap[uid].balance || INITIAL_BUDGET);
+                    const committedDeductions = players
+                        .filter(p => p.highestBidderId === uid && p.contractRemaining === 0)
+                        .reduce((sum, p) => sum + p.currentBid, 0);
 
-            db.ref().update(updatePayload).then(() => {
-                let winnerAlertText = "";
-                if (championId && usersMap[championId]) winnerAlertText += `\n🏆 Champion: ${usersMap[championId].name} (+40M)`;
-                if (runnerUpId && usersMap[runnerUpId]) winnerAlertText += `\n🥈 Runner-Up: ${usersMap[runnerUpId].name} (+20M)`;
-                
-                alert(`🎉 Season ${currentSeason} complete! Advanced to Season ${currentSeason + 1}.${winnerAlertText}\n\nBalances updated with +200M base salary payouts and custom placement rewards.`);
+                    finalBalance = Math.max(0, finalBalance - committedDeductions) + 200; // +200M standard season payout
+                    updatePayload[`users/${uid}/balance`] = finalBalance;
+                }
             });
+
+            updatePayload['season'] = currentSeason + 1;
+            updatePayload['fixtures'] = null; // Clear old schedules
+
+            db.ref().update(updatePayload)
+                .then(() => alert(`Successfully advanced to Season ${currentSeason + 1}.`))
+                .catch(err => alert(err.message));
         }
 
+        // Native Switcher Engine
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.className = 'tab-btn text-slate-400 hover:text-white pb-1');
+            
+            const desktopButtons = document.querySelectorAll('.tab-btn');
+            desktopButtons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.className = 'tab-btn text-cyan-400 border-b-2 border-cyan-400 pb-1 cursor-pointer';
+                } else {
+                    btn.className = 'tab-btn text-slate-400 hover:text-white pb-1 cursor-pointer';
+                }
+            });
+
+            const mobileButtons = document.querySelectorAll('.mobile-tab-btn');
+            mobileButtons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.className = 'mobile-tab-btn flex flex-col items-center gap-1 text-cyan-400 cursor-pointer';
+                } else {
+                    btn.className = 'mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 cursor-pointer';
+                }
+            });
+
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            event.target.className = 'tab-btn text-cyan-400 border-b-2 border-cyan-400 pb-1';
+        }
+
+        // --- ALPINE.JS ARCHIVE LOGIC STATE DRIVER ---
+        function tournamentApp() {
+            return {
+                activeTab: 'standings',
+                activeSeason: 2, // Defaults to Season 2 Tournament
+                seasons: {
+                    1: {
+                        champion: 'Aymaan (Netherlands)',
+                        teams: [
+                            { id: 101, name: 'Germany', player: 'Reeshad', group: 'A' },
+                            { id: 102, name: 'France', player: 'UltNB', group: 'A' },
+                            { id: 103, name: 'England', player: 'Mahee', group: 'A' },
+                            { id: 104, name: 'Brazil', player: 'Nino', group: 'A' },
+                            { id: 105, name: 'Spain', player: 'OnionLarper', group: 'B' },
+                            { id: 106, name: 'Portugal', player: 'Tassin', group: 'B' },
+                            { id: 107, name: 'Netherlands', player: 'Aymaan', group: 'B' },
+                            { id: 108, name: 'Argentina', player: 'Anas', group: 'B' }
+                        ],
+                        matches: [
+                            { id: 1101, round: 1, homeId: 101, awayId: 104, played: true, homeScore: 0, awayScore: 1, stats: { homePossession: 47, awayPossession: 53, homeShots: 0, awayShots: 6, homeShotsOnTarget: 0, awayShotsOnTarget: 3, homePasses: 65, awayPasses: 97, homeSuccessfulPasses: 46, awaySuccessfulPasses: 72 } },
+                            { id: 1102, round: 1, homeId: 102, awayId: 103, played: true, homeScore: 1, awayScore: 2, stats: { homePossession: 42, awayPossession: 58, homeShots: 8, awayShots: 3, homeShotsOnTarget: 6, awayShotsOnTarget: 3, homePasses: 54, awayPasses: 116, homeSuccessfulPasses: 34, awaySuccessfulPasses: 91 } },
+                            { id: 1103, round: 2, homeId: 101, awayId: 103, played: true, homeScore: 1, awayScore: 1, stats: { homePossession: 48, awayPossession: 52, homeShots: 3, awayShots: 4, homeShotsOnTarget: 2, awayShotsOnTarget: 2, homePasses: 72, awayPasses: 86, homeSuccessfulPasses: 56, awaySuccessfulPasses: 69 } },
+                            { id: 1104, round: 2, homeId: 104, awayId: 102, played: true, homeScore: 1, awayScore: 0, stats: { homePossession: 57, awayPossession: 43, homeShots: 1, awayShots: 6, homeShotsOnTarget: 1, awayShotsOnTarget: 3, homePasses: 86, awayPasses: 57, homeSuccessfulPasses: 70, awaySuccessfulPasses: 37 } },
+                            { id: 1105, round: 3, homeId: 101, awayId: 102, played: true, homeScore: 3, awayScore: 3, stats: { homePossession: 50, awayPossession: 50, homeShots: 3, awayShots: 3, homeShotsOnTarget: 3, awayShotsOnTarget: 3, homePasses: 65, awayPasses: 54, homeSuccessfulPasses: 46, awaySuccessfulPasses: 39 } },
+                            { id: 1106, round: 3, homeId: 104, awayId: 103, played: true, homeScore: 3, awayScore: 2, stats: { homePossession: 56, awayPossession: 44, homeShots: 6, awayShots: 3, homeShotsOnTarget: 4, awayShotsOnTarget: 3, homePasses: 87, awayPasses: 83, homeSuccessfulPasses: 70, awaySuccessfulPasses: 65 } },
+                            { id: 1201, round: 1, homeId: 105, awayId: 108, played: true, homeScore: 0, awayScore: 1, stats: { homePossession: 34, awayPossession: 66, homeShots: 0, awayShots: 8, homeShotsOnTarget: 0, awayShotsOnTarget: 4, homePasses: 56, awayPasses: 134, homeSuccessfulPasses: 30, awaySuccessfulPasses: 112 } },
+                            { id: 1202, round: 1, homeId: 106, awayId: 107, played: true, homeScore: 0, awayScore: 0, stats: { homePossession: 24, awayPossession: 76, homeShots: 0, awayShots: 4, homeShotsOnTarget: 0, awayShotsOnTarget: 2, homePasses: 35, awayPasses: 104, homeSuccessfulPasses: 21, awaySuccessfulPasses: 88 } },
+                            { id: 1203, round: 2, homeId: 105, awayId: 107, played: true, homeScore: 0, awayScore: 2, stats: { homePossession: 42, awayPossession: 58, homeShots: 0, awayShots: 5, homeShotsOnTarget: 0, awayShotsOnTarget: 2, homePasses: 74, awayPasses: 72, homeSuccessfulPasses: 47, awaySuccessfulPasses: 67 } },
+                            { id: 1204, round: 2, homeId: 106, awayId: 108, played: true, homeScore: 1, awayScore: 2, stats: { homePossession: 44, awayPossession: 56, homeShots: 5, awayShots: 3, homeShotsOnTarget: 3, awayShotsOnTarget: 2, homePasses: 68, awayPasses: 104, homeSuccessfulPasses: 48, awaySuccessfulPasses: 83 } },
+                            { id: 1205, round: 3, homeId: 105, awayId: 106, played: false, isCancelled: true, homeScore: 0, awayScore: 0, stats: null },
+                            { id: 1206, round: 3, homeId: 108, awayId: 107, played: true, homeScore: 2, awayScore: 3, stats: { homePossession: 55, awayPossession: 45, homeShots: 3, awayShots: 4, homeShotsOnTarget: 2, awayShotsOnTarget: 3, homePasses: 120, awayPasses: 55, homeSuccessfulPasses: 98, awaySuccessfulPasses: 47 } },
+                            { id: 1301, round: 4, stage: 'Semifinal 1', homeId: 108, awayId: 104, played: true, homeScore: 0, awayScore: 0, penaltyText: "Anas (Argentina) won 3-1 on penalties", stats: { homePossession: 41, awayPossession: 59, homeShots: 2, awayShots: 3, homeShotsOnTarget: 1, awayShotsOnTarget: 0, homePasses: 100, awayPasses: 142, homeSuccessfulPasses: 71, awaySuccessfulPasses: 110 } },
+                            { id: 1302, round: 4, stage: 'Semifinal 2', homeId: 103, awayId: 107, played: true, homeScore: 0, awayScore: 1, stats: { homePossession: 48, awayPossession: 52, homeShots: 2, awayShots: 3, homeShotsOnTarget: 1, awayShotsOnTarget: 1, homePasses: 81, awayPasses: 58, homeSuccessfulPasses: 62, awaySuccessfulPasses: 41 } },
+                            { id: 1401, round: 5, stage: 'Grand Final', homeId: 107, awayId: 108, played: true, homeScore: 5, awayScore: 4, specialNote: "Game stopped at 80 mins. Aymaan won on Board's Decision.", stats: { homePossession: 53, awayPossession: 47, homeShots: 9, awayShots: 7, homeShotsOnTarget: 7, awayShotsOnTarget: 5, homePasses: 94, awayPasses: 89, homeSuccessfulPasses: 76, awaySuccessfulPasses: 71 } }
+                        ]
+                    },
+                    2: {
+                        champion: 'Rsd (England)',
+                        teams: [
+                            { id: 201, name: 'France', player: 'Anas', group: 'A' },
+                            { id: 202, name: 'Netherlands', player: 'Nino', group: 'A' },
+                            { id: 203, name: 'France', player: 'onm', group: 'A' },
+                            { id: 204, name: 'France', player: 'Fi', group: 'A' },
+                            { id: 205, name: 'Argentina', player: 'Tassin', group: 'B' },
+                            { id: 206, name: 'England', player: 'Rsd', group: 'B' },
+                            { id: 207, name: 'Spain', player: 'Mahee', group: 'B' },
+                            { id: 208, name: 'France', player: 'Ayman', group: 'B' }
+                        ],
+                        matches: [
+                            { id: 2101, round: 1, homeId: 201, awayId: 204, played: true, homeScore: 1, awayScore: 1, stats: { homePossession: 59, awayPossession: 41, homeShots: 8, awayShots: 4, homeShotsOnTarget: 4, awayShotsOnTarget: 3, homePasses: 137, awayPasses: 77, homeSuccessfulPasses: 108, awaySuccessfulPasses: 48 } },
+                            { id: 2102, round: 1, homeId: 202, awayId: 203, played: true, homeScore: 3, awayScore: 1, stats: { homePossession: 64, awayPossession: 36, homeShots: 13, awayShots: 4, homeShotsOnTarget: 7, awayShotsOnTarget: 4, homePasses: 141, awayPasses: 90, homeSuccessfulPasses: 125, awaySuccessfulPasses: 69 } },
+                            { id: 2103, round: 2, homeId: 203, awayId: 201, played: true, homeScore: 4, awayScore: 3, stats: { homePossession: 44, awayPossession: 56, homeShots: 4, awayShots: 16, homeShotsOnTarget: 4, awayShotsOnTarget: 9, homePasses: 91, awayPasses: 127, homeSuccessfulPasses: 67, awaySuccessfulPasses: 102 } },
+                            { id: 2104, round: 2, homeId: 202, awayId: 204, played: true, homeScore: 6, awayScore: 0, stats: { homePossession: 62, awayPossession: 38, homeShots: 7, awayShots: 0, homeShotsOnTarget: 7, awayShotsOnTarget: 0, homePasses: 104, awayPasses: 50, homeSuccessfulPasses: 83, awaySuccessfulPasses: 35 } },
+                            { id: 2105, round: 3, homeId: 201, awayId: 202, played: true, homeScore: 2, awayScore: 1, stats: { homePossession: 44, awayPossession: 56, homeShots: 5, awayShots: 5, homeShotsOnTarget: 2, awayShotsOnTarget: 2, homePasses: 94, awayPasses: 149, homeSuccessfulPasses: 71, awaySuccessfulPasses: 120 } },
+                            { id: 2106, round: 3, homeId: 203, awayId: 204, played: true, homeScore: 2, awayScore: 2, stats: { homePossession: 48, awayPossession: 52, homeShots: 10, awayShots: 5, homeShotsOnTarget: 6, awayShotsOnTarget: 5, homePasses: 94, awayPasses: 114, homeSuccessfulPasses: 71, awaySuccessfulPasses: 88 } },
+                            { id: 2201, round: 1, homeId: 205, awayId: 208, played: true, homeScore: 0, awayScore: 3, stats: { homePossession: 49, awayPossession: 51, homeShots: 9, awayShots: 4, homeShotsOnTarget: 2, awayShotsOnTarget: 3, homePasses: 85, awayPasses: 87, homeSuccessfulPasses: 63, awaySuccessfulPasses: 71 } },
+                            { id: 2202, round: 1, homeId: 206, awayId: 207, played: true, homeScore: 4, awayScore: 3, stats: { homePossession: 44, awayPossession: 56, homeShots: 11, awayShots: 9, homeShotsOnTarget: 8, awayShotsOnTarget: 6, homePasses: 88, awayPasses: 106, homeSuccessfulPasses: 64, awaySuccessfulPasses: 82 } },
+                            { id: 2203, round: 2, homeId: 205, awayId: 207, played: true, homeScore: 1, awayScore: 2, stats: { homePossession: 42, awayPossession: 58, homeShots: 5, awayShots: 7, homeShotsOnTarget: 3, awayShotsOnTarget: 5, homePasses: 73, awayPasses: 144, homeSuccessfulPasses: 53, awaySuccessfulPasses: 119 } },
+                            { id: 2204, round: 2, homeId: 206, awayId: 208, played: true, homeScore: 3, awayScore: 1, stats: { homePossession: 42, awayPossession: 58, homeShots: 5, awayShots: 9, homeShotsOnTarget: 5, awayShotsOnTarget: 3, homePasses: 85, awayPasses: 90, homeSuccessfulPasses: 56, awaySuccessfulPasses: 72 } },
+                            { id: 2205, round: 3, homeId: 206, awayId: 205, played: true, homeScore: 4, awayScore: 3, stats: { homePossession: 47, awayPossession: 53, homeShots: 5, awayShots: 9, homeShotsOnTarget: 4, awayShotsOnTarget: 5, homePasses: 91, awayPasses: 99, homeSuccessfulPasses: 67, awaySuccessfulPasses: 75 } },
+                            { id: 2206, round: 3, homeId: 207, awayId: 208, played: true, homeScore: 2, awayScore: 3, stats: { homePossession: 44, awayPossession: 56, homeShots: 6, awayShots: 7, homeShotsOnTarget: 6, awayShotsOnTarget: 7, homePasses: 97, awayPasses: 73, homeSuccessfulPasses: 75, awaySuccessfulPasses: 52 } },
+                            { id: 2301, round: 4, stage: 'Semifinal 1', homeId: 202, awayId: 208, played: true, homeScore: 3, awayScore: 2, stats: { homePossession: 58, awayPossession: 42, homeShots: 11, awayShots: 6, homeShotsOnTarget: 8, awayShotsOnTarget: 4, homePasses: 120, awayPasses: 78, homeSuccessfulPasses: 99, awaySuccessfulPasses: 59 } },
+                            { id: 2302, round: 4, stage: 'Semifinal 2', homeId: 206, awayId: 201, played: true, homeScore: 1, awayScore: 1, penaltyText: "Rsd (England) won 5-4 on penalties", stats: { homePossession: 49, awayPossession: 51, homeShots: 5, awayShots: 8, homeShotsOnTarget: 3, awayShotsOnTarget: 5, homePasses: 94, awayPasses: 104, homeSuccessfulPasses: 71, awaySuccessfulPasses: 84 } },
+                            { id: 2401, round: 5, stage: 'Grand Final', homeId: 206, awayId: 202, played: true, homeScore: 4, awayScore: 1, stats: { homePossession: 51, awayPossession: 49, homeShots: 10, awayShots: 4, homeShotsOnTarget: 8, awayShotsOnTarget: 3, homePasses: 102, awayPasses: 98, homeSuccessfulPasses: 81, awaySuccessfulPasses: 72 } }
+                        ]
+                    }
+                },
+
+                // Helper computation calculations
+                getSortedGroup(groupLabel) {
+                    const activeData = this.seasons[this.activeSeason];
+                    const groupTeams = activeData.teams.filter(t => t.group === groupLabel).map(t => ({
+                        ...t, mp: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0
+                    }));
+
+                    activeData.matches.forEach(m => {
+                        if (m.played && !m.isCancelled) {
+                            const home = groupTeams.find(t => t.id === m.homeId);
+                            const away = groupTeams.find(t => t.id === m.awayId);
+                            if (home && away) {
+                                home.mp++; away.mp++;
+                                home.gf += m.homeScore; home.ga += m.awayScore;
+                                away.gf += m.awayScore; away.ga += m.homeScore;
+                                if (m.homeScore > m.awayScore) {
+                                    home.w++; home.pts += 3; away.l++;
+                                } else if (m.homeScore < m.awayScore) {
+                                    away.w++; away.pts += 3; home.l++;
+                                } else {
+                                    home.d++; away.d++; home.pts += 1; away.pts += 1;
+                                }
+                            }
+                        }
+                    });
+                    groupTeams.forEach(t => t.gd = t.gf - t.ga);
+                    return groupTeams.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name));
+                },
+
+                getActiveMatches() {
+                    return this.seasons[this.activeSeason].matches;
+                },
+
+                getTeamName(id) {
+                    const found = this.seasons[this.activeSeason].teams.find(t => t.id === id);
+                    return found ? found.name : '-';
+                },
+
+                getPlayerName(id) {
+                    const found = this.seasons[this.activeSeason].teams.find(t => t.id === id);
+                    return found ? found.player : '';
+                },
+
+                getTopScoringTeams() {
+                    const activeData = this.seasons[this.activeSeason];
+                    return activeData.teams.map(t => {
+                        let goals = 0;
+                        activeData.matches.filter(m => m.played && !m.isCancelled).forEach(m => {
+                            if (m.homeId === t.id) goals += m.homeScore;
+                            if (m.awayId === t.id) goals += m.awayScore;
+                        });
+                        return { name: t.name, goals, player: t.player };
+                    }).sort((a,b) => b.goals - a.goals).slice(0, 5);
+                },
+
+                getTopShootingTeams() {
+                    const activeData = this.seasons[this.activeSeason];
+                    return activeData.teams.map(t => {
+                        let shots = 0;
+                        let targetShots = 0;
+                        activeData.matches.filter(m => m.played && !m.isCancelled && m.stats).forEach(m => {
+                            if (m.homeId === t.id) { shots += m.stats.homeShots; targetShots += m.stats.homeShotsOnTarget; }
+                            if (m.awayId === t.id) { shots += m.stats.awayShots; targetShots += m.stats.awayShotsOnTarget; }
+                        });
+                        const accuracy = shots > 0 ? Math.round((targetShots / shots) * 100) : 0;
+                        return { name: t.name, shots: targetShots, accuracy };
+                    }).sort((a,b) => b.shots - a.shots).slice(0, 5);
+                },
+
+                getPassingStats() {
+                    const activeData = this.seasons[this.activeSeason];
+                    return activeData.teams.map(t => {
+                        let total = 0;
+                        let successful = 0;
+                        activeData.matches.filter(m => m.played && !m.isCancelled && m.stats).forEach(m => {
+                            if (m.homeId === t.id) { total += m.stats.homePasses; successful += m.stats.homeSuccessfulPasses; }
+                            if (m.awayId === t.id) { total += m.stats.awayPasses; successful += m.stats.awaySuccessfulPasses; }
+                        });
+                        const accuracy = total > 0 ? Math.round((successful / total) * 100) : 0;
+                        return { name: t.name, total, successful, accuracy };
+                    }).sort((a,b) => b.accuracy - a.accuracy).slice(0, 5);
+                }
+            };
         }
     </script>
 </body>
