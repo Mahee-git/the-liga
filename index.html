@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eFootball Live Auction Hub</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -17,10 +20,12 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
+    <!-- Live Global Countdown Ticker -->
     <div id="countdown-banner" class="bg-gradient-to-r from-cyan-600 to-blue-600 text-slate-950 font-bold text-center py-2 text-xs uppercase tracking-widest transition-all">
         Loading System State...
     </div>
 
+    <!-- Navbar -->
     <nav class="bg-slate-950 border-b border-cyan-500/30 p-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <h1 class="gaming-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-wider">
@@ -38,8 +43,10 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto p-4 md:p-6">
 
+        <!-- AUTH PORTAL -->
         <div id="auth-section" class="max-w-md mx-auto my-12 bg-slate-950 p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
             <div class="flex justify-center gap-4 mb-6 border-b border-slate-800 pb-4">
                 <button id="toggle-login-btn" onclick="toggleAuthMode('login')" class="text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1">Sign In</button>
@@ -64,12 +71,14 @@
             </div>
         </div>
 
+        <!-- MAIN INTERFACE -->
         <div id="app-interface" class="hidden space-y-6">
             
+            <!-- ADMIN CONTROL MODULE -->
             <div id="admin-controls-panel" class="bg-slate-950 p-4 rounded-xl border border-dashed border-red-500/30 flex flex-wrap gap-4 justify-between items-center hidden">
                 <div>
                     <h3 class="text-sm font-bold text-red-400 uppercase tracking-wider">Tournament Master Dashboard</h3>
-                    <p class="text-xs text-slate-500">Generate scheduling fixtures and advance seasonal structures.</p>
+                    <p class="text-xs text-slate-500">Manage league generation, CSV registers, and seasonal transitions.</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="handleCSV(event)">
@@ -85,10 +94,12 @@
                 </div>
             </div>
 
+            <!-- DASHBOARD TAB -->
             <section id="tab-dashboard" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4 h-fit">
                     <h2 class="gaming-font text-lg font-bold text-cyan-400">Club Standings</h2>
                     
+                    <!-- View Other Squads Selector -->
                     <div>
                         <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Select Roster View Focus</label>
                         <select id="squad-focus-selector" onchange="updateDashboardView()" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500"></select>
@@ -98,12 +109,16 @@
                         <p class="text-xs text-slate-400 uppercase">Manager Status</p>
                         <p id="dash-team-name" class="text-xl font-bold text-white">-</p>
                     </div>
+                    
+                    <!-- Persistent Wallet Display -->
                     <div class="bg-slate-900 p-4 rounded border border-emerald-500/20">
-                        <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Remaining Capital Balance</p>
+                        <p class="text-xs text-emerald-400 uppercase tracking-wider font-semibold">Available Transfer Budget</p>
                         <p id="dash-balance" class="text-3xl font-bold text-white mt-1">200M</p>
+                        <p id="dash-pending-bids" class="text-[10px] text-slate-400 mt-1 italic">Active season bids: 0M</p>
                     </div>
                 </div>
 
+                <!-- Display Squad Sorted dynamically from CF to GK -->
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
                     <h2 class="gaming-font text-lg font-bold text-emerald-400 mb-4 flex justify-between items-center">
                         <span>Active Squad Roster Layout</span>
@@ -125,6 +140,7 @@
                 </div>
             </section>
 
+            <!-- TRANSFER MARKET -->
             <section id="tab-market" class="tab-content hidden space-y-6">
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row gap-4">
                     <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:outline-none focus:border-cyan-500">
@@ -138,9 +154,11 @@
                 <div id="market-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
+            <!-- FIXTURES & STANDINGS TAB -->
             <section id="tab-stats" class="tab-content hidden space-y-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
+                    <!-- DYNAMIC LEAGUE STANDINGS TABLE -->
                     <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-1 h-fit">
                         <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">League Standings Table</h3>
                         <div class="overflow-x-auto">
@@ -158,6 +176,7 @@
                         </div>
                     </div>
 
+                    <!-- MUTUAL PEER-REVIEW FIXTURE SCHEDULER -->
                     <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-2">
                         <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">Fixture Management Center</h3>
                         <div id="fixtures-container" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
@@ -170,7 +189,7 @@
     </main>
 
     <script>
-        // POSITION WEIGHT MATRIX FOR HIERARCHICAL CF ➔ GK SORTING
+        // Position weights for sorting CF down to GK
         const POSITION_ORDER = { 
             "CF": 1, "LWF": 2, "RWF": 3, "AMF": 4, "CMF": 5, 
             "DMF": 6, "LB": 7, "CB": 8, "RB": 9, "GK": 10 
@@ -199,13 +218,13 @@
         let currentSeason = 1;
         let auctionDeadline = null;
         let clockInterval = null;
-        const INITIAL_BUDGET = 200; // RECALIBRATED ECONOMY CRITERIA
+        const INITIAL_BUDGET = 200; // Recalibrated base currency
 
         auth.onAuthStateChanged((user) => {
             if (user) {
                 db.ref('users').on('value', (snapshot) => {
                     usersMap = snapshot.val() || {};
-                    userData = usersMap[user.uid] || { name: "Anonymous Manager", role: "player" };
+                    userData = usersMap[user.uid] || { name: "Anonymous Manager", role: "player", balance: INITIAL_BUDGET };
                     userData.uid = user.uid;
                     
                     buildManagerSelectorDropdown();
@@ -251,14 +270,19 @@
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value.trim();
 
-            if (!email || !password) return alert("Please fill in core connection attributes.");
+            if (!email || !password) return alert("Please fill in email and password.");
 
             if (authMode === 'signup') {
-                if (!name) return alert("Please clarify your custom Team moniker.");
+                if (!name) return alert("Please choose a Custom Team Moniker.");
                 auth.createUserWithEmailAndPassword(email, password)
                     .then((cred) => {
                         const role = email.toLowerCase() === "admin@theliga.com" ? "admin" : "player";
-                        return db.ref(`users/${cred.user.uid}`).set({ name: name, role: role });
+                        // Instantly initialize wallet at 200M inside database registers
+                        return db.ref(`users/${cred.user.uid}`).set({ 
+                            name: name, 
+                            role: role,
+                            balance: INITIAL_BUDGET
+                        });
                     })
                     .catch(err => alert(err.message));
             } else {
@@ -301,7 +325,6 @@
                 renderMarket();
             });
 
-            // Live Fixtures Engine pipeline hook
             db.ref('fixtures').on('value', (snapshot) => {
                 const data = snapshot.val();
                 fixturesList = data ? Object.values(data) : [];
@@ -348,7 +371,7 @@
                         const pId = "P" + String(i).padStart(3, '0');
                         let rawPrice = parseInt(cols[2].replace(/[^0-9]/g, ''));
                         
-                        // Smart Normalization: Converts full 50,000,000 down into a crisp 50
+                        // Converts full raw numeric values down to pristine Millions format
                         if (rawPrice >= 100000) {
                             rawPrice = Math.round(rawPrice / 1000000);
                         }
@@ -374,29 +397,37 @@
             reader.readAsText(file);
         }
 
-        // Feature 1 & 6: View Focus update with specific layout positions sorting criteria
+        // Live Real-Time Dashboard view updates
         function updateDashboardView() {
             const selector = document.getElementById('squad-focus-selector');
             if(!selector || !selector.value) return;
             
             const targetUid = selector.value;
             const targetUser = usersMap[targetUid];
+            if (!targetUser) return;
+
             const isPastDeadline = Date.now() > auctionDeadline;
 
-            // Compute active roster assets assigned to target profile scope
+            // Compute roster items currently assigned to target
             const targetSquad = players.filter(p => p.highestBidderId === targetUid && (p.contractRemaining > 0 || isPastDeadline));
             
-            // Feature 6 Sorting Rule execution: Hierarchy layout implementation
+            // Sort tactical positions CF -> GK
             targetSquad.sort((a, b) => {
                 const orderA = POSITION_ORDER[a.position] || 99;
                 const orderB = POSITION_ORDER[b.position] || 99;
                 return orderA - orderB;
             });
 
-            const seasonalSpent = players.filter(p => p.highestBidderId === targetUid && isPastDeadline && p.contractRemaining === (p.contractYearsSelected - 1)).reduce((sum, p) => sum + p.currentBid, 0);
+            // Dynamic live bidding commitment calculations
+            const myCurrentBalance = targetUser.balance !== undefined ? targetUser.balance : INITIAL_BUDGET;
+            const activeBidsTotal = players.filter(p => p.highestBidderId === targetUid && p.contractRemaining === 0).reduce((sum, p) => sum + p.currentBid, 0);
+            
+            // Available cash equals overall database balance minus currently active auction bids
+            const liveAvailable = myCurrentBalance - activeBidsTotal;
 
-            document.getElementById('dash-team-name').innerText = targetUser ? targetUser.name : "Unknown Club";
-            document.getElementById('dash-balance').innerText = `${(INITIAL_BUDGET - seasonalSpent)}M`;
+            document.getElementById('dash-team-name').innerText = targetUser.name;
+            document.getElementById('dash-balance').innerText = `${liveAvailable}M`;
+            document.getElementById('dash-pending-bids').innerText = `Locked/Active bids this season: ${activeBidsTotal}M (Base cash: ${myCurrentBalance}M)`;
 
             const container = document.getElementById('squad-list');
             container.innerHTML = targetSquad.length === 0 ? `<tr><td colspan="4" class="text-center text-xs text-slate-500 py-6">No roster parameters acquired.</td></tr>` : '';
@@ -476,6 +507,7 @@
                             ` : ''}
                         </div>
 
+                        <!-- 1M/2M Tactical increments -->
                         <div class="space-y-2 mt-2 pt-3 border-t border-slate-900/60">
                             <div class="flex gap-2">
                                 <input type="number" id="bid-input-${player.id}" placeholder="Custom Millions" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white text-center font-mono focus:outline-none" ${disabledAttr}>
@@ -508,6 +540,16 @@
                 return alert(`Offer Denied: Must scale value past ${player.currentBid}M`);
             }
 
+            // Real-Time Bankruptcy Protection Check
+            const myBalance = userData.balance !== undefined ? userData.balance : INITIAL_BUDGET;
+            const currentActiveBidsTotal = players
+                .filter(p => p.highestBidderId === userData.uid && p.contractRemaining === 0 && p.id !== pId)
+                .reduce((sum, p) => sum + p.currentBid, 0);
+
+            if (currentActiveBidsTotal + targetBid > myBalance) {
+                return alert(`Insufficient Funds: This bid (${targetBid}M) combined with your other active bids (${currentActiveBidsTotal}M) exceeds your current account balance of ${myBalance}M!`);
+            }
+
             const contractDropdown = document.getElementById(`contract-select-${pId}`);
             const chosenYears = contractDropdown ? parseInt(contractDropdown.value) : 1;
 
@@ -520,7 +562,7 @@
             });
         }
 
-        // Feature 3: Dynamic Circle/Berger Round-Robin Scheduling Generator Engine
+        // Home/Away Round-Robin Generator Engine
         function generateFixtures() {
             const managers = Object.keys(usersMap).filter(uid => usersMap[uid].role !== 'admin');
             if(managers.length < 2) return alert("Aborting Generation: Insufficient user nodes verified inside database structure.");
@@ -577,12 +619,11 @@
             db.ref('fixtures').set(fixtures).then(() => alert("Balanced Home/Away Fixture Matrix Compiled!"));
         }
 
-        // Feature 4: Interactive Mutual Peer Verification Architecture
+        // Interactive Standings Calculations and Verification Panel
         function renderStandingsAndFixtures() {
             const tableBody = document.getElementById('league-table-body');
             const fixturesContainer = document.getElementById('fixtures-container');
             
-            // 1. Calculate Real-Time Standings
             const tableData = {};
             Object.keys(usersMap).forEach(uid => {
                 if(usersMap[uid].role !== 'admin') {
@@ -622,10 +663,8 @@
                     </tr>`;
             });
 
-            // 2. Render Interactive Match Center Cards
             fixturesContainer.innerHTML = fixturesList.length === 0 ? `<div class="text-center text-xs text-slate-500 py-12 border border-dashed border-slate-800 rounded">Fixtures schedule matrix uninitialized.</div>` : '';
             
-            // Group fixtures clean by chronological round tracking
             let currentRenderedRound = 0;
 
             fixturesList.sort((a,b) => a.round - b.round).forEach(match => {
@@ -705,20 +744,89 @@
             });
         }
 
+        // Real-Time Payouts & Contract Expiry State transitions
         function advanceSeason() {
-            if (!confirm("⚠️ Transition tournament ecosystem state to next Season iteration structure safely?")) return;
+            if (!confirm("⚠️ Transition tournament ecosystem state to next Season iteration structure safely? This calculates winners, handles the 200M base payout, updates placement rewards, and clears fixtures.")) return;
+
+            // 1. Determine Standings to establish Champion & Runner-up
+            const tableData = {};
+            Object.keys(usersMap).forEach(uid => {
+                if(usersMap[uid].role !== 'admin') {
+                    tableData[uid] = { uid: uid, played: 0, gd: 0, pts: 0 };
+                }
+            });
+
+            fixturesList.forEach(m => {
+                if(m.status === "Approved") {
+                    const hScore = parseInt(m.homeScore);
+                    const aScore = parseInt(m.awayScore);
+                    if(tableData[m.homeId] && tableData[m.awayId]) {
+                        tableData[m.homeId].played++;
+                        tableData[m.awayId].played++;
+                        tableData[m.homeId].gd += (hScore - aScore);
+                        tableData[m.awayId].gd += (aScore - hScore);
+
+                        if(hScore > aScore) tableData[m.homeId].pts += 3;
+                        else if(aScore > hScore) tableData[m.awayId].pts += 3;
+                        else {
+                            tableData[m.homeId].pts += 1;
+                            tableData[m.awayId].pts += 1;
+                        }
+                    }
+                }
+            });
+
+            const sortedStandings = Object.values(tableData).sort((a,b) => b.pts - a.pts || b.gd - a.gd);
+            const championId = sortedStandings[0] ? sortedStandings[0].uid : null;
+            const runnerUpId = sortedStandings[1] ? sortedStandings[1].uid : null;
+
             const updatePayload = {};
+
+            // 2. Process Manager Wallet Balances
+            Object.keys(usersMap).forEach(uid => {
+                if(usersMap[uid].role === 'admin') return;
+
+                const currentBalance = usersMap[uid].balance !== undefined ? usersMap[uid].balance : INITIAL_BUDGET;
+                
+                // Calculate actual money spent this season (bids won where contracts haven't decremented yet)
+                const spentThisSeason = players
+                    .filter(p => p.highestBidderId === uid && p.contractRemaining === 0)
+                    .reduce((sum, p) => sum + p.currentBid, 0);
+                
+                // Deduct expenditures
+                let finalBalance = currentBalance - spentThisSeason;
+
+                // Add base +200M seasonal payout
+                finalBalance += 200;
+
+                // Apply placement rewards (+40M for Champ, +20M for Runner-up)
+                let bonusLabel = "";
+                if (championId && uid === championId) {
+                    finalBalance += 40;
+                    bonusLabel = " (Champion +40M)";
+                } else if (runnerUpId && uid === runnerUpId) {
+                    finalBalance += 20;
+                    bonusLabel = " (Runner-up +20M)";
+                }
+
+                updatePayload[`users/${uid}/balance`] = finalBalance;
+            });
+
+            // 3. Process Player Contracts
             players.forEach(p => {
                 let currentRemaining = p.contractRemaining;
+                
                 if (p.highestBidderId !== "" && currentRemaining === 0) {
                     currentRemaining = p.contractYearsSelected;
                 }
+
                 if (currentRemaining > 0) {
                     const nextRemaining = currentRemaining - 1;
                     if (nextRemaining > 0) {
                         updatePayload[`players/${p.id}/contractRemaining`] = nextRemaining;
                         updatePayload[`players/${p.id}/status`] = "Locked";
                     } else {
+                        // Release player back onto the transfer pool
                         updatePayload[`players/${p.id}/contractRemaining`] = 0;
                         updatePayload[`players/${p.id}/highestBidderId`] = "";
                         updatePayload[`players/${p.id}/highestBidderName`] = "No Bids";
@@ -728,13 +836,19 @@
                 }
             });
 
-            const nextDeadline = Date.now() + (24 * 60 * 60 * 1000);
+            // 4. Update core server metadata states
+            const nextDeadline = Date.now() + (24 * 60 * 60 * 1000); // Sets default 24-hour draft window
             updatePayload['systemSettings/currentSeason'] = currentSeason + 1;
             updatePayload['systemSettings/auctionDeadline'] = nextDeadline;
-            // Clean up old matches history nodes cleanly
-            updatePayload['fixtures'] = null;
+            updatePayload['fixtures'] = null; // Purges old standings
 
-            db.ref().update(updatePayload).then(() => alert(`Initialized Season ${currentSeason + 1}!`));
+            db.ref().update(updatePayload).then(() => {
+                let winnerAlertText = "";
+                if (championId && usersMap[championId]) winnerAlertText += `\n🏆 Champion: ${usersMap[championId].name} (+40M)`;
+                if (runnerUpId && usersMap[runnerUpId]) winnerAlertText += `\n🥈 Runner-Up: ${usersMap[runnerUpId].name} (+20M)`;
+                
+                alert(`🎉 Season ${currentSeason} complete! Advanced to Season ${currentSeason + 1}.${winnerAlertText}\n\nBalances updated with +200M base salary payouts and custom placement rewards.`);
+            });
         }
 
         function switchTab(tabId) {
