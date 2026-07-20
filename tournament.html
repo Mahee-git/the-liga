@@ -79,7 +79,7 @@
                                 id: 1206, round: 3, homeId: 108, awayId: 107, played: true, homeScore: 2, awayScore: 3, 
                                 stats: { homePossession: 55, awayPossession: 45, homeShots: 3, awayShots: 4, homeShotsOnTarget: 2, awayShotsOnTarget: 3, homePasses: 120, awayPasses: 55, homeSuccessfulPasses: 98, awaySuccessfulPasses: 47 } 
                             },
-                            // PLAYOFFS (Round 4 = Semis, Round 5 = Final)
+                            // PLAYOFFS
                             {
                                 id: 1301, round: 4, stage: 'Semifinal 1', homeId: 108, awayId: 104, played: true, homeScore: 0, awayScore: 0, penaltyText: "Anas (Argentina) won 3-1 on penalties",
                                 stats: { homePossession: 41, awayPossession: 59, homeShots: 2, awayShots: 3, homeShotsOnTarget: 1, awayShotsOnTarget: 0, homePasses: 100, awayPasses: 142, homeSuccessfulPasses: 71, awaySuccessfulPasses: 110 }
@@ -95,7 +95,7 @@
                         ]
                     },
                     2: {
-                        champion: null, // Season 2 Ongoing
+                        champion: 'Anas (France)', // Updated Champion
                         teams: [
                             // GROUP A
                             { id: 201, name: 'France', player: 'Anas', group: 'A' },
@@ -106,80 +106,87 @@
                             { id: 205, name: 'Argentina', player: 'Tassin', group: 'B' },
                             { id: 206, name: 'England', player: 'Rsd', group: 'B' },
                             { id: 207, name: 'Spain', player: 'Mahee', group: 'B' },
-                            { id: 208, name: 'France', player: 'Ayman', group: 'B' }
+                            { id: 208, name: 'France', player: 'Aymaan', group: 'B' }
                         ],
                         matches: [
                             // GROUP A ROUND 1
                             { 
                                 id: 2101, round: 1, homeId: 201, awayId: 204, played: true, homeScore: 1, awayScore: 1, 
                                 stats: { homePossession: 59, awayPossession: 41, homeShots: 8, awayShots: 4, homeShotsOnTarget: 4, awayShotsOnTarget: 3, homePasses: 137, awayPasses: 77, homeSuccessfulPasses: 108, awaySuccessfulPasses: 48 } 
-                            }, // Anas (FRA) vs Fi (FRA)
+                            }, 
                             { 
                                 id: 2102, round: 1, homeId: 202, awayId: 203, played: true, homeScore: 3, awayScore: 1, 
                                 stats: { homePossession: 64, awayPossession: 36, homeShots: 13, awayShots: 4, homeShotsOnTarget: 7, awayShotsOnTarget: 4, homePasses: 141, awayPasses: 90, homeSuccessfulPasses: 125, awaySuccessfulPasses: 69 } 
-                            }, // Nino (NED) vs onm (FRA) [Updated]
+                            }, 
 
                             // GROUP A ROUND 2
                             { 
                                 id: 2103, round: 2, homeId: 203, awayId: 201, played: true, homeScore: 4, awayScore: 3, 
                                 stats: { homePossession: 44, awayPossession: 56, homeShots: 4, awayShots: 16, homeShotsOnTarget: 4, awayShotsOnTarget: 9, homePasses: 91, awayPasses: 127, homeSuccessfulPasses: 67, awaySuccessfulPasses: 102 } 
-                            }, // onm (FRA) vs Anas (FRA) 
+                            }, 
                             { 
                                 id: 2104, round: 2, homeId: 202, awayId: 204, played: true, homeScore: 6, awayScore: 0, 
                                 stats: { homePossession: 62, awayPossession: 48, homeShots: 7, awayShots: 0, homeShotsOnTarget: 7, awayShotsOnTarget: 0, homePasses: 104, awayPasses: 50, homeSuccessfulPasses: 83, awaySuccessfulPasses: 35 } 
-                            }, //Nino (NED) vs Fi (FRA)
+                            }, 
 
                             // GROUP A ROUND 3
                             { 
                                 id: 2105, round: 3, homeId: 201, awayId: 202, played: true, homeScore: 2, awayScore: 1, 
                                 stats: { homePossession: 44, awayPossession: 56, homeShots: 5, awayShots: 5, homeShotsOnTarget: 2, awayShotsOnTarget: 2, homePasses: 94, awayPasses: 149, homeSuccessfulPasses: 71, awaySuccessfulPasses: 120 } 
-                            }, // Anas (FRA) vs Nino (NED) [Updated]
+                            }, 
                             { 
                                 id: 2106, round: 3, homeId: 203, awayId: 204, played: true, homeScore: 2, awayScore: 2, 
                                 stats: { homePossession: 48, awayPossession: 52, homeShots: 10, awayShots: 5, homeShotsOnTarget: 6, awayShotsOnTarget: 5, homePasses: 94, awayPasses: 114, homeSuccessfulPasses: 71, awaySuccessfulPasses: 88 } 
-                            }, //onm (FRA) vs Fi (FRA)
+                            }, 
 
                             // GROUP B ROUND 1
                             { 
                                 id: 2201, round: 1, homeId: 205, awayId: 208, played: true, homeScore: 0, awayScore: 3, 
                                 stats: { homePossession: 49, awayPossession: 51, homeShots: 9, awayShots: 4, homeShotsOnTarget: 2, awayShotsOnTarget: 3, homePasses: 85, awayPasses: 87, homeSuccessfulPasses: 63, awaySuccessfulPasses: 71 } 
-                            }, // Tassin (ARG) vs Ayman (POR)
+                            }, 
                             { 
                                 id: 2202, round: 1, homeId: 206, awayId: 207, played: true, homeScore: 4, awayScore: 3, 
                                 stats: { homePossession: 44, awayPossession: 56, homeShots: 11, awayShots: 9, homeShotsOnTarget: 8, awayShotsOnTarget: 6, homePasses: 88, awayPasses: 106, homeSuccessfulPasses: 64, awaySuccessfulPasses: 82 } 
-                            }, // Rsd (ENG) vs Mahee (ESP) [Updated]
+                            }, 
 
                             // GROUP B ROUND 2
                             { 
                                 id: 2203, round: 2, homeId: 205, awayId: 207, played: true, homeScore: 1, awayScore: 2, 
                                 stats: { homePossession: 42, awayPossession: 58, homeShots: 5, awayShots: 7, homeShotsOnTarget: 3, awayShotsOnTarget: 5, homePasses: 73, awayPasses: 144, homeSuccessfulPasses: 53, awaySuccessfulPasses: 119 } 
-                            }, // Tassin (ARG) vs Mahee (ESP) [Updated]
+                            }, 
                             { 
                                 id: 2204, round: 2, homeId: 206, awayId: 208, played: true, homeScore: 3, awayScore: 1, 
                                 stats: { homePossession: 42, awayPossession: 58, homeShots: 5, awayShots: 9, homeShotsOnTarget: 5, awayShotsOnTarget: 3, homePasses: 85, awayPasses: 90, homeSuccessfulPasses: 56, awaySuccessfulPasses: 72 } 
-                            }, //Rsd (ENG) vs Ayman (POR)
+                            }, 
 
                             // GROUP B ROUND 3
                             { 
                                 id: 2205, round: 3, homeId: 206, awayId: 205, played: true, homeScore: 4, awayScore: 3, 
                                 stats: { homePossession: 47, awayPossession: 53, homeShots: 5, awayShots: 9, homeShotsOnTarget: 4, awayShotsOnTarget: 5, homePasses: 91, awayPasses: 99, homeSuccessfulPasses: 67, awaySuccessfulPasses: 75 } 
-                            }, //Rsd (ENG) vs Tassin (ARG)
+                            }, 
                             { 
                                 id: 2206, round: 3, homeId: 207, awayId: 208, played: true, homeScore: 2, awayScore: 3, 
                                 stats: { homePossession: 44, awayPossession: 56, homeShots: 6, awayShots: 7, homeShotsOnTarget: 6, awayShotsOnTarget: 7, homePasses: 97, awayPasses: 73, homeSuccessfulPasses: 75, awaySuccessfulPasses: 52 } 
-                            }, // Ayman (POR) vs Mahee (ESP)
+                            }, 
 
-                            // PLAYOFF PLACEHOLDERS FOR S2
-                            { id: 2301, round: 4, stage: 'Semifinal 1', homeId: null, awayId: null, played: false, homeScore: 0, awayScore: 0, stats: { homePossession: 50, awayPossession: 50, homeShots: 0, awayShots: 0, homeShotsOnTarget: 0, awayShotsOnTarget: 0, homePasses: 0, awayPasses: 0, homeSuccessfulPasses: 0, awaySuccessfulPasses: 0 } },
-                            { id: 2302, round: 4, stage: 'Semifinal 2', homeId: null, awayId: null, played: false, homeScore: 0, awayScore: 0, stats: { homePossession: 50, awayPossession: 50, homeShots: 0, awayShots: 0, homeShotsOnTarget: 0, awayShotsOnTarget: 0, homePasses: 0, awayPasses: 0, homeSuccessfulPasses: 0, awaySuccessfulPasses: 0 } },
-                            { id: 2301, round: 4, stage: 'Semifinal 1', homeId: 202, awayId: 208, played: false, homeScore: 0, awayScore: 0, stats: { homePossession: 50, awayPossession: 50, homeShots: 0, awayShots: 0, homeShotsOnTarget: 0, awayShotsOnTarget: 0, homePasses: 0, awayPasses: 0, homeSuccessfulPasses: 0, awaySuccessfulPasses: 0 } },
-                            { id: 2302, round: 4, stage: 'Semifinal 2', homeId: 206, awayId: 201, played: false, homeScore: 0, awayScore: 0, stats: { homePossession: 50, awayPossession: 50, homeShots: 0, awayShots: 0, homeShotsOnTarget: 0, awayShotsOnTarget: 0, homePasses: 0, awayPasses: 0, homeSuccessfulPasses: 0, awaySuccessfulPasses: 0 } },
-                            { id: 2401, round: 5, stage: 'Grand Final', homeId: null, awayId: null, played: false, homeScore: 0, awayScore: 0, stats: { homePossession: 50, awayPossession: 50, homeShots: 0, awayShots: 0, homeShotsOnTarget: 0, awayShotsOnTarget: 0, homePasses: 0, awayPasses: 0, homeSuccessfulPasses: 0, awaySuccessfulPasses: 0 } }
+                            // PLAYOFFS FOR S2 UPDATED
+                            { 
+                                id: 2301, round: 4, stage: 'Semifinal 1', homeId: 202, awayId: 208, played: true, homeScore: 2, awayScore: 1, 
+                                stats: { homePossession: 52, awayPossession: 48, homeShots: 4, awayShots: 4, homeShotsOnTarget: 4, awayShotsOnTarget: 3, homePasses: 121, awayPasses: 72, homeSuccessfulPasses: 99, awaySuccessfulPasses: 56 } 
+                            },
+                            { 
+                                id: 2302, round: 4, stage: 'Semifinal 2', homeId: 206, awayId: 201, played: true, homeScore: 3, awayScore: 4, 
+                                stats: { homePossession: 49, awayPossession: 51, homeShots: 4, awayShots: 12, homeShotsOnTarget: 3, awayShotsOnTarget: 9, homePasses: 103, awayPasses: 70, homeSuccessfulPasses: 77, awaySuccessfulPasses: 57 } 
+                            },
+                            { 
+                                id: 2401, round: 5, stage: 'Grand Final', homeId: 201, awayId: 202, played: true, homeScore: 4, awayScore: 0, 
+                                stats: { homePossession: 46, awayPossession: 54, homeShots: 9, awayShots: 5, homeShotsOnTarget: 8, awayShotsOnTarget: 4, homePasses: 93, awayPasses: 108, homeSuccessfulPasses: 71, awaySuccessfulPasses: 88 } 
+                            }
                         ]
                     }
                 },
 
-                // Dynamic getters to ensure existing HTML references render flawlessly for active season
+                // Dynamic getters
                 get teams() { return this.seasons[this.activeSeason].teams; },
                 get matches() { return this.seasons[this.activeSeason].matches; },
 
@@ -217,7 +224,6 @@
                     });
 
                     groupTeams.forEach(t => t.gd = t.gf - t.ga);
-                    // Sort by Points -> Goal Difference -> Goals For -> Name alphabetically
                     return groupTeams.sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name));
                 },
 
@@ -299,10 +305,10 @@
          :class="activeSeason === 1 ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600' : 'bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-500'">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent animate-pulse"></div>
         <div class="relative flex items-center justify-center gap-2 text-sm sm:text-base">
-            <span x-text="activeSeason === 1 ? '👑' : '🔥'"></span>
+            <span>👑</span>
             <span x-show="activeSeason === 1">LIGA WC26 SEASON 1 CHAMPION: <span class="font-black text-white underline decoration-wavy">Aymaan (Netherlands)</span> 🎉</span>
-            <span x-show="activeSeason === 2">LIGA WC26 <span class="font-black text-slate-900 underline">SEASON 2</span> IS NOW UNDERWAY! ⚽</span>
-            <span x-text="activeSeason === 1 ? '👑' : '🔥'"></span>
+            <span x-show="activeSeason === 2">LIGA WC26 SEASON 2 CHAMPION: <span class="font-black text-white underline decoration-wavy">Anas (France)</span> 🎉</span>
+            <span>👑</span>
         </div>
     </div>
 
@@ -312,6 +318,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
                 <div class="flex items-center gap-2.5 justify-between sm:justify-start">
                     <div class="flex items-center gap-2">
+                        <!-- 📍 LINK BACK TO HOMEPAGE (index.html) -->
+                        <a href="index.html" class="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/40 px-2.5 py-1 rounded text-xs font-bold transition-all flex items-center gap-1">
+                            ← Auction Hub
+                        </a>
                         <div class="bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded text-xs tracking-wider">EFOOTBALL</div>
                         <h1 class="text-xl font-black tracking-tight text-white">THE LIGA <span class="text-emerald-400">WC26</span></h1>
                     </div>
@@ -331,7 +341,6 @@
                         :class="activeSeason === 2 ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'" 
                         class="flex-1 md:flex-none px-3.5 py-1 rounded text-xs sm:text-sm transition duration-150 font-semibold min-h-[36px]">
                     Season 2 
-                    <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse ml-1"></span>
                 </button>
             </div>
 
@@ -392,18 +401,17 @@
                                 </div>
                             </template>
 
-                            <!-- Season 2 Template -->
+                            <!-- Season 2 Data -->
                             <template x-if="activeSeason === 2">
                                 <div class="space-y-1">
                                     <div class="flex justify-between text-xs">
-                                        <span class="text-slate-500">Group A Winner</span>
-                                        <span class="font-mono text-slate-500">-</span>
+                                        <span class="text-white font-bold">Nino (Netherlands) ✅</span>
+                                        <span class="font-mono font-bold text-emerald-400">2</span>
                                     </div>
                                     <div class="flex justify-between text-xs">
-                                        <span class="text-slate-500">Group B Runner-Up</span>
-                                        <span class="font-mono text-slate-500">-</span>
+                                        <span class="text-slate-400">Aymaan (France)</span>
+                                        <span class="font-mono font-bold text-slate-400">1</span>
                                     </div>
-                                    <div class="text-[9px] text-slate-500 border-t border-slate-800/60 pt-1 text-center">Upcoming Playoff</div>
                                 </div>
                             </template>
                         </div>
@@ -426,18 +434,17 @@
                                 </div>
                             </template>
 
-                            <!-- Season 2 Template -->
+                            <!-- Season 2 Data -->
                             <template x-if="activeSeason === 2">
                                 <div class="space-y-1">
                                     <div class="flex justify-between text-xs">
-                                        <span class="text-slate-500">Group B Winner</span>
-                                        <span class="font-mono text-slate-500">-</span>
+                                        <span class="text-slate-400">Rsd (England)</span>
+                                        <span class="font-mono font-bold text-slate-400">3</span>
                                     </div>
                                     <div class="flex justify-between text-xs">
-                                        <span class="text-slate-500">Group A Runner-Up</span>
-                                        <span class="font-mono text-slate-500">-</span>
+                                        <span class="text-white font-bold">Anas (France) ✅</span>
+                                        <span class="font-mono font-bold text-emerald-400">4</span>
                                     </div>
-                                    <div class="text-[9px] text-slate-500 border-t border-slate-800/60 pt-1 text-center">Upcoming Playoff</div>
                                 </div>
                             </template>
                         </div>
@@ -447,17 +454,17 @@
                     <div class="hidden md:flex flex-col justify-around items-center h-full py-8 text-slate-600">
                         <div class="text-center w-full">
                             <span class="text-xs block text-slate-500">SF 1 Winner ➡️</span>
-                            <span class="font-bold text-xs" :class="activeSeason === 1 ? 'text-emerald-400' : 'text-slate-600'" x-text="activeSeason === 1 ? 'Anas' : 'TBD'"></span>
+                            <span class="font-bold text-xs text-emerald-400" x-text="activeSeason === 1 ? 'Anas' : 'Nino'"></span>
                         </div>
                         <div class="text-center w-full">
                             <span class="text-xs block text-slate-500">SF 2 Winner ➡️</span>
-                            <span class="font-bold text-xs" :class="activeSeason === 1 ? 'text-emerald-400' : 'text-slate-600'" x-text="activeSeason === 1 ? 'Aymaan' : 'TBD'"></span>
+                            <span class="font-bold text-xs text-emerald-400" x-text="activeSeason === 1 ? 'Aymaan' : 'Anas'"></span>
                         </div>
                     </div>
 
                     <!-- Grand Finals -->
                     <div class="space-y-4">
-                        <div class="text-xs font-bold text-slate-500 uppercase tracking-widest text-amber-400">Grand Final</div>
+                        <div class="text-xs font-bold uppercase tracking-widest text-amber-400">Grand Final</div>
 
                         <!-- Final Card -->
                         <div class="bg-amber-950/20 border-2 border-amber-500/50 rounded-lg p-4 space-y-3 relative overflow-hidden">
@@ -481,19 +488,19 @@
                                 </div>
                             </template>
 
-                            <!-- Season 2 Grand Final Placeholder -->
+                            <!-- Season 2 Grand Final Detail -->
                             <template x-if="activeSeason === 2">
                                 <div class="space-y-1">
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-slate-500 font-bold">SF 1 Winner</span>
-                                        <span class="font-mono font-bold text-slate-500">-</span>
+                                        <span class="text-white font-black">Anas (France) 👑</span>
+                                        <span class="font-mono font-black text-amber-400">4</span>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-slate-500 font-bold">SF 2 Winner</span>
-                                        <span class="font-mono font-bold text-slate-500">-</span>
+                                        <span class="text-slate-400">Nino (Netherlands)</span>
+                                        <span class="font-mono font-bold text-white">0</span>
                                     </div>
-                                    <div class="text-[9px] text-amber-400 border-t border-amber-900/40 pt-1.5 leading-tight">
-                                        Winner crowned at conclusion of playoffs.
+                                    <div class="text-[9px] text-amber-300 font-medium border-t border-amber-900/40 pt-1.5 leading-tight">
+                                        Anas crowned Season 2 Champion!
                                     </div>
                                 </div>
                             </template>
@@ -507,7 +514,7 @@
                 <div class="bg-slate-950 rounded-xl border border-slate-800 p-4 sm:p-5 shadow-xl">
                     <h2 class="text-lg font-bold border-b border-slate-800 pb-2.5 mb-3 text-emerald-400 flex justify-between items-center">
                         <span class="flex items-center gap-1.5">🛡️ Group A Table</span>
-                        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-normal" x-text="activeSeason === 1 ? 'Group Completed' : 'Underway'"></span>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-normal">Group Completed</span>
                     </h2>
 
                     <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -552,7 +559,7 @@
                 <div class="bg-slate-950 rounded-xl border border-slate-800 p-4 sm:p-5 shadow-xl">
                     <h2 class="text-lg font-bold border-b border-slate-800 pb-2.5 mb-3 text-emerald-400 flex justify-between items-center">
                         <span class="flex items-center gap-1.5">🛡️ Group B Table</span>
-                        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-normal" x-text="activeSeason === 1 ? 'Group Completed' : 'Underway'"></span>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-normal">Group Completed</span>
                     </h2>
 
                     <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -656,7 +663,7 @@
                                         </div>
                                     </template>
 
-                                    <!-- Compact Detailed Stats (Conditional on play verification) -->
+                                    <!-- Compact Detailed Stats -->
                                     <template x-if="match.played && !match.isCancelled">
                                         <div class="mt-3 pt-3 border-t border-slate-900 text-[10px] text-slate-400 grid grid-cols-3 gap-y-1.5 max-w-sm mx-auto text-center font-medium">
                                             <!-- Possession Row -->
