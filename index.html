@@ -20,21 +20,28 @@
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
 
-        /* Squad Formation Pitch Styles */
+        /* Realistic Squad Formation Pitch Styles */
         .pitch-bg {
-            background-color: #166534; 
-            background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
-            border: 2px solid rgba(255,255,255,0.2);
+            background-color: #2e7d32;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 10%,
+                rgba(0, 0, 0, 0.08) 10%,
+                rgba(0, 0, 0, 0.08) 20%
+            );
+            border: 2px solid rgba(255,255,255,0.4);
             position: relative;
+            border-radius: 6px;
+            overflow: hidden;
         }
         .pitch-slot {
             width: 50px; height: 50px;
-            border: 1px dashed rgba(255,255,255,0.4);
+            border: 1px dashed rgba(255,255,255,0.6);
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
         }
         .pitch-slot.filled {
             border-style: solid;
@@ -78,14 +85,15 @@
 
     <main class="max-w-7xl mx-auto p-4 md:p-6">
 
-        <!-- AUTH PORTAL (Updated to purely use Manager/Team Name) -->
+        <!-- AUTH PORTAL -->
         <div id="auth-section" class="max-w-md mx-auto my-6 md:my-12 bg-slate-950 p-6 md:p-8 rounded-xl border border-cyan-500/20 shadow-2xl">
             <div class="flex justify-center gap-4 mb-6 border-b border-slate-800 pb-4">
                 <button id="toggle-login-btn" onclick="toggleAuthMode('login')" class="text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1">Sign In</button>
                 <button id="toggle-signup-btn" onclick="toggleAuthMode('signup')" class="text-slate-400 font-bold text-sm uppercase tracking-wider pb-1">Create Account</button>
+                <button id="toggle-admin-btn" onclick="toggleAuthMode('admin')" class="text-slate-400 font-bold text-sm uppercase tracking-wider pb-1">Admin</button>
             </div>
             <div class="space-y-4">
-                <div>
+                <div id="auth-name-container">
                     <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Manager / Team Name</label>
                     <input type="text" id="auth-name" placeholder="e.g., Dhaka Galácticos" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
                 </div>
@@ -142,7 +150,6 @@
                             <select id="squad-focus-selector" onchange="updateDashboardView()" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500"></select>
                         </div>
                         
-                        <!-- Updated User Profile Snapshot -->
                         <div class="flex items-start gap-4 border-t border-slate-800 pt-4">
                             <img id="dash-prof-pic" src="https://via.placeholder.com/150/0f172a/06b6d4?text=MGR" class="w-14 h-14 rounded-full border-2 border-cyan-500/50 object-cover mt-1 bg-slate-900">
                             <div class="overflow-hidden">
@@ -214,11 +221,17 @@
                             </h2>
                             <div class="flex items-center gap-3">
                                 <select id="formation-selector" onchange="updateFormationSelection()" class="bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500 font-bold cursor-pointer">
-                                    <option value="4-3-3">4-3-3 Standard</option>
-                                    <option value="4-2-3-1">4-2-3-1 Balanced</option>
-                                    <option value="4-4-2">4-4-2 Classic</option>
-                                    <option value="3-5-2">3-5-2 Attacking</option>
-                                    <option value="5-3-2">5-3-2 Defensive</option>
+                                    <option value="4-1-2-3">4-1-2-3</option>
+                                    <option value="4-4-2">4-4-2</option>
+                                    <option value="4-3-3" selected>4-3-3</option>
+                                    <option value="4-2-3-1">4-2-3-1</option>
+                                    <option value="3-5-2">3-5-2</option>
+                                    <option value="3-4-3">3-4-3</option>
+                                    <option value="3-4-2-1">3-4-2-1</option>
+                                    <option value="5-3-2">5-3-2</option>
+                                    <option value="5-4-1">5-4-1</option>
+                                    <option value="5-2-3">5-2-3</option>
+                                    <option value="5-2-2-1">5-2-2-1</option>
                                 </select>
                                 <button id="save-formation-btn" onclick="saveFormation()" class="bg-cyan-600 hover:bg-cyan-700 text-slate-950 font-bold px-4 py-2 rounded text-xs transition uppercase tracking-wider shadow-md cursor-pointer">Save Tactic</button>
                             </div>
@@ -232,8 +245,17 @@
                             </div>
                             
                             <div class="w-full lg:w-2/3">
-                                <div class="pitch-bg w-full h-[450px] rounded-lg flex flex-col justify-around py-4 shadow-inner" id="pitch-container">
-                                    <!-- Dynamic Pitch Rows populated by JS -->
+                                <div class="pitch-bg w-full h-[450px] flex flex-col justify-around py-4" id="pitch-container">
+                                    <!-- Decorative Pitch Lines -->
+                                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[40%] h-[15%] border-2 border-white/40 border-t-0 z-0"></div>
+                                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[40%] h-[15%] border-2 border-white/40 border-b-0 z-0"></div>
+                                    <div class="absolute top-1/2 left-0 w-full h-[2px] bg-white/40 -translate-y-1/2 z-0"></div>
+                                    <div class="absolute top-1/2 left-1/2 w-[90px] h-[90px] border-2 border-white/40 rounded-full -translate-x-1/2 -translate-y-1/2 z-0"></div>
+
+                                    <!-- Players Container -->
+                                    <div id="pitch-rows-container" class="relative z-10 w-full h-full flex flex-col justify-around">
+                                        <!-- Dynamic Pitch Rows populated by JS -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -243,6 +265,7 @@
 
             <!-- PROFILE TAB MODULE -->
             <section id="tab-profile" class="tab-content hidden max-w-2xl mx-auto space-y-6">
+                <!-- ... Profile unchanged ... -->
                 <div class="bg-slate-950 p-6 md:p-8 rounded-xl border border-cyan-500/30 shadow-lg">
                     <h2 class="gaming-font text-xl font-bold text-cyan-400 mb-6 border-b border-slate-800 pb-3">Manager Profile Settings</h2>
                     
@@ -286,6 +309,7 @@
 
             <!-- BIDDING MARKET MODULE -->
             <section id="tab-market" class="tab-content hidden space-y-6">
+                <!-- ... Market unchanged ... -->
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row gap-4">
                     <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:outline-none focus:border-cyan-500">
                     <select id="position-filter" onchange="renderMarket()" class="bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-300 w-full sm:w-auto">
@@ -300,6 +324,7 @@
 
             <!-- FIXTURES & STANDINGS MODULE -->
             <section id="tab-stats" class="tab-content hidden space-y-8">
+                <!-- ... Stats unchanged ... -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-1 h-fit">
                         <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">League Standings Table</h3>
@@ -329,6 +354,7 @@
 
             <!-- LEAGUE ARCHIVES MODULE -->
             <section id="tab-archives" class="tab-content hidden space-y-6">
+                <!-- ... Archives unchanged ... -->
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-slate-800 pb-4">
                         <div>
@@ -353,6 +379,7 @@
     </main>
 
     <!-- DETAILED MATCH STATS SUBMISSION MODAL -->
+    <!-- ... Modal unchanged ... -->
     <div id="match-stat-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-950 border border-cyan-500/40 w-full max-w-xl rounded-xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -498,22 +525,30 @@
         function toggleAuthMode(mode) {
             authMode = mode;
             const submitBtn = document.getElementById('auth-submit-btn');
+            const nameContainer = document.getElementById('auth-name-container');
             
             document.getElementById('toggle-login-btn').className = mode === 'login' ? 'text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1' : 'text-slate-400 font-bold text-sm uppercase tracking-wider pb-1';
             document.getElementById('toggle-signup-btn').className = mode === 'signup' ? 'text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1' : 'text-slate-400 font-bold text-sm uppercase tracking-wider pb-1';
+            document.getElementById('toggle-admin-btn').className = mode === 'admin' ? 'text-cyan-400 font-bold text-sm uppercase tracking-wider border-b-2 border-cyan-400 pb-1' : 'text-slate-400 font-bold text-sm uppercase tracking-wider pb-1';
 
-            if (mode === 'signup') {
-                submitBtn.innerText = "Register Account";
+            if (mode === 'admin') {
+                nameContainer.classList.add('hidden');
+                submitBtn.innerText = "Access Admin Panel";
             } else {
-                submitBtn.innerText = "Sign In";
+                nameContainer.classList.remove('hidden');
+                submitBtn.innerText = mode === 'signup' ? "Register Account" : "Sign In";
             }
         }
 
         function handleAuth() {
-            const name = document.getElementById('auth-name').value.trim();
+            let name = document.getElementById('auth-name').value.trim();
             const password = document.getElementById('auth-password').value;
 
-            if (!name || !password) return alert("Please fill in Manager/Team Name and password.");
+            if (authMode === 'admin') {
+                name = 'admin'; // Override name with admin credential root
+            }
+
+            if (!name || !password) return alert("Please fill in the required credentials.");
 
             // Construct deterministic pseudo-email mapping from manager name for Firebase auth
             const mockEmail = name.toLowerCase().replace(/[^a-z0-9]/g, '') + "@theliga.com";
@@ -689,17 +724,18 @@
         }
 
         function drawPitch(isEditable) {
-            const container = document.getElementById('pitch-container');
+            const container = document.getElementById('pitch-rows-container');
             if (!container) return;
             container.innerHTML = '';
             
+            // Reversing the array logic to ensure Strikers are mapped at the top and GK at the bottom
             const rows = currentFormation.split('-').map(Number);
-            rows.push(1); // Add Goalkeeper row
-            
-            // Loop from Attackers to GK
-            rows.reverse().forEach((count, rowIndex) => {
+            rows.reverse(); // Standard is Def-Mid-Att, reverse puts Attacker layers first
+            rows.push(1); // Adds the Goalkeeper row to the very bottom
+
+            rows.forEach((count, rowIndex) => {
                 const rowDiv = document.createElement('div');
-                rowDiv.className = "flex justify-center gap-3 sm:gap-6 w-full";
+                rowDiv.className = "flex justify-center gap-3 sm:gap-6 w-full z-10";
                 for(let i = 0; i < count; i++) {
                     const slotId = `s-${rowIndex}-${i}`;
                     const pid = formationPositions[slotId];
