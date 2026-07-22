@@ -673,47 +673,16 @@
                 }
             };
 
-            // Fixed Image Saving System - Converts directly to Base64 in browser and stores directly in Realtime Database.
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Resize image to max 250px so database is not overwhelmed with heavy image bytes.
-                        const MAX_SIZE = 250;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_SIZE) {
-                                height *= MAX_SIZE / width;
-                                width = MAX_SIZE;
-                            }
-                        } else {
-                            if (height > MAX_SIZE) {
-                                width *= MAX_SIZE / height;
-                                height = MAX_SIZE;
-                            }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Get Compressed Base64 String
-                        updateData.photoURL = canvas.toDataURL('image/jpeg', 0.8);
-                        finalizeSave();
-                    };
-                    img.src = e.target.result;
-                };
-                reader.onerror = function() {
-                    alert("Error processing the image.");
+                const ref = storage.ref(`profiles/${userData.uid}`);
+                ref.put(file).then(snapshot => snapshot.ref.getDownloadURL())
+                .then(url => {
+                    updateData.photoURL = url;
+                    finalizeSave();
+                }).catch(err => {
+                    alert("Error uploading picture: " + err.message);
                     btn.innerText = "Save Profile Changes";
-                };
-                reader.readAsDataURL(file);
+                });
             } else {
                 finalizeSave();
             }
@@ -1497,7 +1466,149 @@
                 if (p.highestBidderId !== "" && currentRemaining === 0) {
                     currentRemaining = p.contractYearsSelected;
                 }
+
+                if (currentRemaining > 0) {
+                    const nextRemaining = currentRemaining - 1;
+                    if (nextRemaining > 0) {
+                        updatePayload[`players/${p.id}/contractRemaining`] = nextRemaining;
+                        updatePayload[`players/${p.id}/status`] = "Locked";
+                    } else {
+                        updatePayload[`players/${p.id}/contractRemaining`] = 0;
+                        updatePayload[`players/${p.id}/highestBidderId`] = "";
+                        updatePayload[`players/${p.id}/highestBidderName`] = "No Bids";
+                        updatePayload[`players/${p.id}/status`] = "Available";
+                        updatePayload[`players/${p.id}/currentBid`] = p.basePrice; 
+                    }
+                }
             });
+
+            const nextDeadline = Date.now() + (24 * 60 * 60 * 1000);
+            updatePayload['systemSettings/currentSeason'] = currentSeason + 1;
+            updatePayload['systemSettings/auctionDeadline'] = nextDeadline;
+            updatePayload['fixtures'] = null;
+
+            db.ref().update(updatePayload).then(() => {
+                let winnerAlertText = "";
+                if (championId && usersMap[championId]) winnerAlertText += `\n🏆 Champion: ${usersMap[championId].name} (+40M)`;
+                if (runnerUpId && usersMap[runnerUpId]) winnerAlertText += `\n🥈 Runner-Up: ${usersMap[runnerUpId].name} (+20M)`;
+                alert(`🎉 Season ${currentSeason} History Saved & Advanced Successfully!${winnerAlertText}`);
+            });
+        }
+
+        function populateArchiveSeasonDropdown() {
+            const selector = document.getElementById('archive-season-selector');
+            if(!selector) return;
+
+            const seasonKeys = Object.keys(archivedSeasonsMap);
+            if(seasonKeys.length === 0) {
+                selector.innerHTML = `<option value="">No Archived Seasons Yet</option>`;
+                return;
+            }
+
+            let html = '<option value="">-- Choose Season --</option>';
+            seasonKeys.forEach(sKey => {
+                const sData = archivedSeasonsMap[sKey];
+                html += `<option value="${sKey}">Season ${sData.seasonNumber || sKey}</option>`;
+            });
+            selector.innerHTML = html;
+        }
+
+        function renderArchivedSeasonData() {
+            const key = document.getElementById('archive-season-selector').value;
+            const container = document.getElementById('archive-content-area');
+            if(!key || !archivedSeasonsMap[key]) {
+                container.innerHTML = `<div class="text-center text-xs text-slate-500 py-12">Select an archived season to review past statistics and rosters.</div>`;
+                return;
+            }
+
+            const data = archivedSeasonsMap[key];
+            const standings = data.standings || [];
+            const fixtures = data.fixtures || [];
+            const squads = data.squads || {};
+
+            let standingsHTML = `
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="font-bold text-xs text-amber-400 uppercase tracking-wider">🏆 Season ${data.seasonNumber} Final Standings</h3>
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="text-slate-500 border-b border-slate-800 uppercase">
+                                <th class="pb-2">Club</th>
+                                <th class="pb-2 text-center">Played</th>
+                                <th class="pb-2 text-center">GD</th>
+                                <th class="pb-2 text-right">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/40 font-mono">`;
+            
+            standings.forEach((st, idx) => {
+                standingsHTML += `
+                    <tr>
+                        <td class="py-2 font-sans font-semibold ${idx === 0 ? 'text-amber-400' : 'text-slate-200'}">${idx === 0 ? '👑 ' : ''}${st.name}</td>
+                        <td class="text-center text-slate-400">${st.played}</td>
+                        <td class="text-center ${st.gd > 0 ? 'text-emerald-400' : st.gd < 0 ? 'text-rose-400' : 'text-slate-500'}">${st.gd > 0 ? '+' : ''}${st.gd}</td>
+                        <td class="text-right text-cyan-400 font-bold">${st.pts}</td>
+                    </tr>`;
+            });
+            standingsHTML += `</tbody></table></div>`;
+
+            let squadsHTML = `<div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-4">
+                <h3 class="font-bold text-xs text-cyan-400 uppercase tracking-wider">📋 Archived Team Squads</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            
+            Object.keys(squads).forEach(uid => {
+                const sqData = squads[uid];
+                squadsHTML += `
+                    <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs">
+                        <p class="font-bold text-white mb-2 border-b border-slate-800 pb-1">${sqData.managerName}</p>
+                        <ul class="space-y-1">`;
+                if(sqData.squad && sqData.squad.length > 0) {
+                    sqData.squad.forEach(p => {
+                        squadsHTML += `<li class="flex justify-between text-slate-300"><span>${p.name} <span class="text-[10px] text-slate-500">(${p.position})</span></span> <span class="font-mono text-cyan-400">${p.currentBid}M</span></li>`;
+                    });
+                } else {
+                    squadsHTML += `<li class="text-slate-500 italic">No players recorded.</li>`;
+                }
+                squadsHTML += `</ul></div>`;
+            });
+            squadsHTML += `</div></div>`;
+
+            let fixturesHTML = `<div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                <h3 class="font-bold text-xs text-emerald-400 uppercase tracking-wider">⚽ Match History Log</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+            
+            fixtures.forEach(m => {
+                fixturesHTML += `
+                    <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs flex justify-between items-center">
+                        <span class="w-2/5 truncate text-right text-slate-300 font-medium">${m.homeName}</span>
+                        <span class="bg-slate-900 px-2 py-0.5 rounded font-mono font-bold text-cyan-400 border border-slate-800 mx-2">${m.homeScore} : ${m.awayScore}</span>
+                        <span class="w-2/5 truncate text-left text-slate-300 font-medium">${m.awayName}</span>
+                    </div>`;
+            });
+            fixturesHTML += `</div></div>`;
+
+            container.innerHTML = standingsHTML + squadsHTML + fixturesHTML;
+        }
+
+        function switchTab(tabId, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Reset all tab styling
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn px-4 py-2 rounded-full bg-slate-800 text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 transition cursor-pointer text-sm font-medium';
+            });
+            
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            // Set active styling on clicked tab
+            if (event) {
+                event.target.className = 'tab-btn px-4 py-2 rounded-full bg-cyan-900/40 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)] transition cursor-pointer text-sm font-bold';
+            }
+        }
+
+        function tournamentApp() {
+            return {
+                archiveTab: 'standings'
+            }
         }
     </script>
 </body>
