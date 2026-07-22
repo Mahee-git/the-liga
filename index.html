@@ -539,24 +539,26 @@
                 submitBtn.innerText = mode === 'signup' ? "Register Account" : "Sign In";
             }
         }
-
+        // Define your specific admin username here
+        const ADMIN_USERNAME = "LeagueMaster"; // <-- Change this to whatever username you want
+        
         function handleAuth() {
             let name = document.getElementById('auth-name').value.trim();
             const password = document.getElementById('auth-password').value;
 
+            // If the user clicks the "Admin" tab, auto-fill the defined admin username
             if (authMode === 'admin') {
-                name = 'admin'; // Override name with admin credential root
+                name = ADMIN_USERNAME; 
             }
-
             if (!name || !password) return alert("Please fill in the required credentials.");
-
             // Construct deterministic pseudo-email mapping from manager name for Firebase auth
             const mockEmail = name.toLowerCase().replace(/[^a-z0-9]/g, '') + "@theliga.com";
-
+            
             if (authMode === 'signup') {
                 auth.createUserWithEmailAndPassword(mockEmail, password)
                     .then((cred) => {
-                        const role = (mockEmail === "admintheligacom" || name.toLowerCase() === "admin") ? "admin" : "player";
+                        // Check if the registered name matches your specific admin username
+                        const role = (name.toLowerCase() === ADMIN_USERNAME.toLowerCase()) ? "admin" : "player";
                         return db.ref(`users/${cred.user.uid}`).set({ 
                             name: name, 
                             role: role,
@@ -569,6 +571,7 @@
             }
         }
 
+        
         function logout() { auth.signOut().then(() => location.reload()); }
 
         function showAuthPortal() {
