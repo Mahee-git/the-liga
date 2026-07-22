@@ -636,7 +636,6 @@
                 populateArchiveSeasonDropdown();
             });
         }
-
         function saveProfile(event) {
             const btn = event.target;
             const newName = document.getElementById('prof-name').value.trim();
@@ -644,45 +643,65 @@
             const desc = document.getElementById('prof-desc').value.trim();
             const favPlayer = document.getElementById('prof-fav').value.trim();
             const file = document.getElementById('prof-pic').files[0];
-            
             if(!newName) return alert("Manager Name cannot be empty.");
-
             const updateData = { description: desc, favoritePlayer: favPlayer };
             btn.innerText = "Saving...";
-
+            btn.disabled = true;
+            const resetBtn = () => {
+                btn.innerText = "Save Profile Changes";
+                btn.disabled = false;
+            };
             const finalizeSave = () => {
                 if(newName !== userData.name) {
                     const newMockEmail = newName.toLowerCase().replace(/[^a-z0-9]/g, '') + "@theliga.com";
                     auth.currentUser.updateEmail(newMockEmail).then(() => {
                         updateData.name = newName;
-                        if(newPass) auth.currentUser.updatePassword(newPass);
+                        if(newPass) auth.currentUser.updatePassword(newPass).catch(e => alert(e.message));
                         return db.ref(`users/${userData.uid}`).update(updateData);
                     }).then(() => {
                         alert("Profile updated successfully!");
-                        btn.innerText = "Save Profile Changes";
+                        resetBtn();
                     }).catch(err => {
                         alert("For security, please logout and sign in again to change Manager Name/Password. " + err.message);
-                        btn.innerText = "Save Profile Changes";
+                        resetBtn();
                     });
                 } else {
-                    if(newPass) auth.currentUser.updatePassword(newPass).catch(e => alert(e.message));
-                    db.ref(`users/${userData.uid}`).update(updateData).then(() => {
+                    const passPromise = newPass
+                        ? auth.currentUser.updatePassword(newPass).catch(e => { alert(e.message); })
+                        : Promise.resolve();
+                    passPromise.then(() => {
+                        return db.ref(`users/${userData.uid}`).update(updateData);
+                    }).then(() => {
                         alert("Profile updated successfully!");
-                        btn.innerText = "Save Profile Changes";
+                        resetBtn();
+                    }).catch(err => {
+                        alert("Error updating profile: " + err.message);
+                        resetBtn();
                     });
                 }
             };
-
             if (file) {
-                const ref = storage.ref(`profiles/${userData.uid}`);
-                ref.put(file).then(snapshot => snapshot.ref.getDownloadURL())
-                .then(url => {
-                    updateData.photoURL = url;
-                    finalizeSave();
-                }).catch(err => {
-                    alert("Error uploading picture: " + err.message);
-                    btn.innerText = "Save Profile Changes";
-                });
+                const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+                if (file.size > MAX_FILE_SIZE) {
+                    alert("Please select an image smaller than 2MB.");
+                    resetBtn();
+                    return;
+                }
+                const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+                const ref = storage.ref(`profiles/${userData.uid}.${ext}`);
+                const uploadPromise = ref.put(file).then(snapshot => snapshot.ref.getDownloadURL());
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Upload timed out. Check Firebase Storage rules/config.")), 15000)
+                                                  );
+                Promise.race([uploadPromise, timeoutPromise])
+                    .then(url => {
+                        updateData.photoURL = url;
+                        finalizeSave();
+                    }).catch(err => {
+                        console.error("Error uploading picture:", err);
+                        alert("Image upload failed (" + err.message + "). Saving other profile changes without picture.");
+                        finalizeSave();
+                    });
             } else {
                 finalizeSave();
             }
