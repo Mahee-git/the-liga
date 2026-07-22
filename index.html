@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
     <style>
@@ -150,8 +149,7 @@
                             <select id="squad-focus-selector" onchange="updateDashboardView()" class="w-full bg-slate-900 border border-slate-700 text-xs rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500"></select>
                         </div>
                         
-                        <div class="flex items-start gap-4 border-t border-slate-800 pt-4">
-                            <img id="dash-prof-pic" src="https://via.placeholder.com/150/0f172a/06b6d4?text=MGR" class="w-14 h-14 rounded-full border-2 border-cyan-500/50 object-cover mt-1 bg-slate-900">
+                        <div class="border-t border-slate-800 pt-4">
                             <div class="overflow-hidden">
                                 <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Manager</p>
                                 <p id="dash-team-name" class="text-lg font-bold text-white leading-tight truncate">-</p>
@@ -265,19 +263,10 @@
 
             <!-- PROFILE TAB MODULE -->
             <section id="tab-profile" class="tab-content hidden max-w-2xl mx-auto space-y-6">
-                <!-- ... Profile unchanged ... -->
                 <div class="bg-slate-950 p-6 md:p-8 rounded-xl border border-cyan-500/30 shadow-lg">
                     <h2 class="gaming-font text-xl font-bold text-cyan-400 mb-6 border-b border-slate-800 pb-3">Manager Profile Settings</h2>
                     
                     <div class="space-y-5">
-                        <div class="flex items-center gap-6 mb-4">
-                            <img id="profile-preview" src="https://via.placeholder.com/150/0f172a/06b6d4?text=PIC" class="w-24 h-24 rounded-full border-2 border-cyan-500 object-cover bg-slate-900">
-                            <div>
-                                <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Profile Picture</label>
-                                <input type="file" id="prof-pic" accept="image/*" class="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-cyan-900/30 file:text-cyan-400 hover:file:bg-cyan-900/50 cursor-pointer">
-                            </div>
-                        </div>
-
                         <div>
                             <label class="block text-xs uppercase tracking-wider text-slate-400 mb-2">Manager / Team Name</label>
                             <input type="text" id="prof-name" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-white focus:outline-none focus:border-cyan-500">
@@ -309,7 +298,6 @@
 
             <!-- BIDDING MARKET MODULE -->
             <section id="tab-market" class="tab-content hidden space-y-6">
-                <!-- ... Market unchanged ... -->
                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row gap-4">
                     <input type="text" id="search-bar" oninput="renderMarket()" placeholder="Search live transfer market..." class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-sm focus:outline-none focus:border-cyan-500">
                     <select id="position-filter" onchange="renderMarket()" class="bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-300 w-full sm:w-auto">
@@ -324,7 +312,6 @@
 
             <!-- FIXTURES & STANDINGS MODULE -->
             <section id="tab-stats" class="tab-content hidden space-y-8">
-                <!-- ... Stats unchanged ... -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 lg:col-span-1 h-fit">
                         <h3 class="gaming-font text-sm font-bold text-cyan-400 mb-4 border-b border-slate-800 pb-2 uppercase tracking-wider">League Standings Table</h3>
@@ -354,7 +341,6 @@
 
             <!-- LEAGUE ARCHIVES MODULE -->
             <section id="tab-archives" class="tab-content hidden space-y-6">
-                <!-- ... Archives unchanged ... -->
                 <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-6">
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-slate-800 pb-4">
                         <div>
@@ -379,7 +365,6 @@
     </main>
 
     <!-- DETAILED MATCH STATS SUBMISSION MODAL -->
-    <!-- ... Modal unchanged ... -->
     <div id="match-stat-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-950 border border-cyan-500/40 w-full max-w-xl rounded-xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -476,7 +461,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
-        const storage = firebase.storage();
 
         let players = [];
         let usersMap = {};
@@ -540,24 +524,22 @@
             }
         }
         // Define your specific admin username here
-        const ADMIN_USERNAME = "LeagueMaster"; // <-- Change this to whatever username you want
+        const ADMIN_USERNAME = "LeagueMaster"; 
         
         function handleAuth() {
             let name = document.getElementById('auth-name').value.trim();
             const password = document.getElementById('auth-password').value;
 
-            // If the user clicks the "Admin" tab, auto-fill the defined admin username
             if (authMode === 'admin') {
                 name = ADMIN_USERNAME; 
             }
             if (!name || !password) return alert("Please fill in the required credentials.");
-            // Construct deterministic pseudo-email mapping from manager name for Firebase auth
+            
             const mockEmail = name.toLowerCase().replace(/[^a-z0-9]/g, '') + "@theliga.com";
             
             if (authMode === 'signup') {
                 auth.createUserWithEmailAndPassword(mockEmail, password)
                     .then((cred) => {
-                        // Check if the registered name matches your specific admin username
                         const role = (name.toLowerCase() === ADMIN_USERNAME.toLowerCase()) ? "admin" : "player";
                         return db.ref(`users/${cred.user.uid}`).set({ 
                             name: name, 
@@ -571,7 +553,6 @@
             }
         }
 
-        
         function logout() { auth.signOut().then(() => location.reload()); }
 
         function showAuthPortal() {
@@ -596,9 +577,6 @@
             document.getElementById('prof-name').value = userData.name || '';
             document.getElementById('prof-fav').value = userData.favoritePlayer || '';
             document.getElementById('prof-desc').value = userData.description || '';
-            if(userData.photoURL) {
-                document.getElementById('profile-preview').src = userData.photoURL;
-            }
 
             db.ref('systemSettings').on('value', (snapshot) => {
                 const settings = snapshot.val() || {};
@@ -636,74 +614,38 @@
                 populateArchiveSeasonDropdown();
             });
         }
+
         function saveProfile(event) {
             const btn = event.target;
             const newName = document.getElementById('prof-name').value.trim();
             const newPass = document.getElementById('prof-pass').value;
             const desc = document.getElementById('prof-desc').value.trim();
             const favPlayer = document.getElementById('prof-fav').value.trim();
-            const file = document.getElementById('prof-pic').files[0];
+            
             if(!newName) return alert("Manager Name cannot be empty.");
+
             const updateData = { description: desc, favoritePlayer: favPlayer };
             btn.innerText = "Saving...";
-            btn.disabled = true;
-            const resetBtn = () => {
-                btn.innerText = "Save Profile Changes";
-                btn.disabled = false;
-            };
-            const finalizeSave = () => {
-                if(newName !== userData.name) {
-                    const newMockEmail = newName.toLowerCase().replace(/[^a-z0-9]/g, '') + "@theliga.com";
-                    auth.currentUser.updateEmail(newMockEmail).then(() => {
-                        updateData.name = newName;
-                        if(newPass) auth.currentUser.updatePassword(newPass).catch(e => alert(e.message));
-                        return db.ref(`users/${userData.uid}`).update(updateData);
-                    }).then(() => {
-                        alert("Profile updated successfully!");
-                        resetBtn();
-                    }).catch(err => {
-                        alert("For security, please logout and sign in again to change Manager Name/Password. " + err.message);
-                        resetBtn();
-                    });
-                } else {
-                    const passPromise = newPass
-                        ? auth.currentUser.updatePassword(newPass).catch(e => { alert(e.message); })
-                        : Promise.resolve();
-                    passPromise.then(() => {
-                        return db.ref(`users/${userData.uid}`).update(updateData);
-                    }).then(() => {
-                        alert("Profile updated successfully!");
-                        resetBtn();
-                    }).catch(err => {
-                        alert("Error updating profile: " + err.message);
-                        resetBtn();
-                    });
-                }
-            };
-            if (file) {
-                const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-                if (file.size > MAX_FILE_SIZE) {
-                    alert("Please select an image smaller than 2MB.");
-                    resetBtn();
-                    return;
-                }
-                const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-                const ref = storage.ref(`profiles/${userData.uid}.${ext}`);
-                const uploadPromise = ref.put(file).then(snapshot => snapshot.ref.getDownloadURL());
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Upload timed out. Check Firebase Storage rules/config.")), 15000)
-                                                  );
-                Promise.race([uploadPromise, timeoutPromise])
-                    .then(url => {
-                        updateData.photoURL = url;
-                        finalizeSave();
-                    }).catch(err => {
-                        console.error("Error uploading picture:", err);
-                        alert("Image upload failed (" + err.message + "). Saving other profile changes without picture.");
-                        finalizeSave();
-                    });
+
+            if(newName !== userData.name) {
+                const newMockEmail = newName.toLowerCase().replace(/[^a-z0-9]/g, '') + "@theliga.com";
+                auth.currentUser.updateEmail(newMockEmail).then(() => {
+                    updateData.name = newName;
+                    if(newPass) auth.currentUser.updatePassword(newPass);
+                    return db.ref(`users/${userData.uid}`).update(updateData);
+                }).then(() => {
+                    alert("Profile updated successfully!");
+                    btn.innerText = "Save Profile Changes";
+                }).catch(err => {
+                    alert("For security, please logout and sign in again to change Manager Name/Password. " + err.message);
+                    btn.innerText = "Save Profile Changes";
+                });
             } else {
-                finalizeSave();
+                if(newPass) auth.currentUser.updatePassword(newPass).catch(e => alert(e.message));
+                db.ref(`users/${userData.uid}`).update(updateData).then(() => {
+                    alert("Profile updated successfully!");
+                    btn.innerText = "Save Profile Changes";
+                });
             }
         }
 
@@ -711,7 +653,7 @@
 
         function updateFormationSelection() {
             currentFormation = document.getElementById('formation-selector').value;
-            formationPositions = {}; // clear layout on formation swap
+            formationPositions = {};
             drawPitch(true);
             renderDraggableRoster(true, userData.uid);
         }
@@ -750,10 +692,9 @@
             if (!container) return;
             container.innerHTML = '';
             
-            // Reversing the array logic to ensure Strikers are mapped at the top and GK at the bottom
             const rows = currentFormation.split('-').map(Number);
-            rows.reverse(); // Standard is Def-Mid-Att, reverse puts Attacker layers first
-            rows.push(1); // Adds the Goalkeeper row to the very bottom
+            rows.reverse(); 
+            rows.push(1); 
 
             rows.forEach((count, rowIndex) => {
                 const rowDiv = document.createElement('div');
@@ -828,7 +769,6 @@
             
             if(!playerId) return;
 
-            // Handle swapping logic
             if(formationPositions[targetSlotId]) {
                 if(sourceSlot) {
                     formationPositions[sourceSlot] = formationPositions[targetSlotId];
@@ -859,8 +799,6 @@
                 positions: formationPositions
             }).then(() => alert("Tactical formation saved successfully!"));
         }
-
-        // --- END SQUAD BUILDER LOGIC ---
 
         function startTimerEngine() {
             if(clockInterval) clearInterval(clockInterval);
@@ -962,11 +900,9 @@
             const targetUser = usersMap[targetUid];
             if (!targetUser) return;
 
-            // Load Manager Snapshot Details
             document.getElementById('dash-team-name').innerText = targetUser.name || '-';
             document.getElementById('dash-fav-player').innerText = targetUser.favoritePlayer ? `Fav Player: ${targetUser.favoritePlayer}` : '';
             document.getElementById('dash-bio').innerText = targetUser.description || '';
-            document.getElementById('dash-prof-pic').src = targetUser.photoURL || 'https://via.placeholder.com/150/0f172a/06b6d4?text=MGR';
 
             const isPastDeadline = Date.now() > auctionDeadline;
             const targetSquad = players.filter(p => p.highestBidderId === targetUid && (p.contractRemaining > 0 || isPastDeadline));
@@ -1015,7 +951,6 @@
                 });
             }
 
-            // Render Formation Layout on Update
             renderFormationBuilder();
         }
 
@@ -1611,14 +1546,12 @@
         function switchTab(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             
-            // Reset all tab styling
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.className = 'tab-btn px-4 py-2 rounded-full bg-slate-800 text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 transition cursor-pointer text-sm font-medium';
             });
             
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             
-            // Set active styling on clicked tab
             if (event) {
                 event.target.className = 'tab-btn px-4 py-2 rounded-full bg-cyan-900/40 text-cyan-400 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)] transition cursor-pointer text-sm font-bold';
             }
